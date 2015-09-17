@@ -1,15 +1,17 @@
 #include "weakcrypt.h"
 #include <stdlib.h>
 
-char* xorCrypt(char* key, unsigned int keylength, char* msg, unsigned int msglength){
+char* xorCrypt(const char* key, unsigned int keylength, const char* msg, unsigned int msglength){
 	//allocate memory for ciphertext output
 	char* ciphertext=(char*)malloc(msglength);
 	
 	//xor msg with key
-	for(int i=0;i<msglength;i++){
+	unsigned int i;
+	for(i=0;i<msglength;i++){
 		ciphertext[i]=key[i%keylength] ^ msg[i];
-		ciphertext[i+1]='\0';
 	}
+	ciphertext[i+1]='\0';//Make sure string ends with null char
+
 	
 	return ciphertext;
 }

@@ -7,6 +7,6 @@
 #ifndef HEADER_WEAKCRYPT
 	#define HEADER_WEAKCRYPT 1
 	
-	//Encrypt with key by XOR-ing
-	char* xorCrypt(char* key, unsigned int keylength, char* msg, unsigned int msglength);
+	//Encrypt msg by xor-ing msg with key
+	char* xorCrypt(const char*, unsigned int, const char*, unsigned int);
 #endif
