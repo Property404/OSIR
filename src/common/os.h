@@ -14,16 +14,22 @@
 		//System
 		bool is_win;
 		bool is_elf;
-		
-		//Windows
-		bool is_msi;
-		bool is_dll;
-		bool is_managed;//.NET
+		bool is_native;
+		bool is_managed;//i.e: .NET
 		
 		
 	} Executable;
 
-
+	
+	//Set File Time
+	bool setFileModifiedDate(const char*, int64_t);
+	//Check file time
+	int64_t getFileCreatedDate(const char* filename);
+	int64_t getFileModifiedDate(const char* filename);
+	
+	//Check file extension
+	char* getFileExtension(const char* filename);
+	
 	//Get executable type
 	struct Executable* getExecType(const char* filename);
 
