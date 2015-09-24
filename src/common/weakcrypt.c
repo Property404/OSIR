@@ -3,7 +3,7 @@
 
 char* xorCrypt(const char* key, unsigned int keylength, const char* msg, unsigned int msglength){
 	//allocate memory for ciphertext output
-	char* ciphertext=(char*)malloc(msglength);
+	char* ciphertext=(char*)malloc(sizeof(char)*msglength);
 	
 	//xor msg with key
 	unsigned int i;
