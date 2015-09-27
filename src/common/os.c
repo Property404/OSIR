@@ -16,8 +16,8 @@ char** walkDir(const char* top){
 	
 	//Other variables
 	char* entpath;
-	char** ls=malloc(1*sizeof(char*));
-	ls[0]=malloc(1*sizeof(char));
+	char** ls=(char**)malloc(1*sizeof(char*));
+	ls[0]=(char*)malloc(1*sizeof(char));
 	strcpy(ls[0],"\0");
 	unsigned int lscount=0;
 	
@@ -41,19 +41,20 @@ char** walkDir(const char* top){
 					if(strcmp(ent->d_name,".\0") && strcmp(ent->d_name,"..\0")){
 						
 						//Add files from subdirectory
-						char** newls=malloc(1);
+						char** newls=(char**)malloc(1);
 						newls=walkDir(entpath);
 						for(unsigned int i=0;strcmp(newls[i],"\0");i++){
+							
 							//Reallocate ls
-							ls=realloc(ls,(lscount+2)*sizeof(char*));
+							ls=(char**)realloc(ls,(lscount+2)*sizeof(char*));
 							if(ls==NULL){printf("ALLOCATION ERROR\n");break;}
 							
 							//Add new file to ls
-							ls[lscount]=malloc(strlen(newls[i])+1);
+							ls[lscount]=(char*)malloc(strlen(newls[i])+1);
 							strcpy(ls[lscount],newls[i]);
 							
 							//Append null character
-							ls[++lscount]=malloc(1);
+							ls[++lscount]=(char*)malloc(1);
 							strcpy(ls[lscount],"\0");
 							
 							//Free memory
@@ -63,15 +64,15 @@ char** walkDir(const char* top){
 					}
 				}else{
 					//Reallocate ls
-					ls=realloc(ls,(lscount+2)*sizeof(char*));
+					ls=(char**)realloc(ls,(lscount+2)*sizeof(char*));
 					if(ls==NULL){printf("ALLOCATION ERROR\n");break;}
 					
 					//Add new file to ls
-					ls[lscount]=malloc(strlen(entpath)+1);
+					ls[lscount]=(char*)malloc(strlen(entpath)+1);
 					strcpy(ls[lscount],entpath);
 					
 					//Append null character
-					ls[++lscount]=malloc(1);
+					ls[++lscount]=(char*)malloc(1);
 					strcpy(ls[lscount],"\0");
 				}
 		}
@@ -109,25 +110,29 @@ time_t getFileModifiedDate(const char* filename){
 }
 
 char* getFileExtension(const char* filename){
-	char extension[MAX_FILE_NAME_LENGTH]="\0"; 
+	//Use volatile to keep optimized code from breaking
+	volatile char extension[MAX_FILE_NAME_LENGTH]="\0"; 
+	
 	//Find extension
 	for(int i=0,j=-1;filename[i]!='\0';i++){
+		
 		//If dot is found, start recording extension
 		if(j>=0){
-			extension[j]=filename[i];
+			extension[j]=tolower(filename[i]);
 			extension[++j]='\0';
 		}
 		if(filename[i]=='.'){
 			j=0;
 			extension[0]='\0';
 		}
+		//Cancel recording if slash found
 		if(filename[i]=='/' || filename[i]=='\\'){
 			j=-1;
 			extension[0]='\0';
 		}
-	}                                                        	
-	//Return extension
-	char* ret_extension=extension;
+	}                  
+              
+	char* ret_extension=(char*)extension;
 	return ret_extension;
 }
 

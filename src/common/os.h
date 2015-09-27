@@ -24,7 +24,7 @@
 	//Walk through directory
 	char** walkDir(const char*);
 	
-	//Set File Time
+	//Set/get File Time
 	bool setFileModifiedDate(const char*, time_t);
 	time_t getFileModifiedDate(const char* filename);
 	
