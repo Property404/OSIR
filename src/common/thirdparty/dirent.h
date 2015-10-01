@@ -24,6 +24,16 @@
  *
  * $Id: dirent.h,v 1.20 2014/03/19 17:52:23 tronkko Exp $
  */
+ 
+ //Unix
+#if !defined(_WIN32) && !defined(DIRENT_H)
+	#include <dirent.h>
+	#ifndef DIRENT_H
+		#define DIRENT_H
+	#endif
+#endif
+
+//Windows
 #ifndef DIRENT_H
 #define DIRENT_H
 
@@ -40,13 +50,13 @@
 #endif
 
 #include <stdio.h>
-#include <stdarg.h>
+//#include <stdarg.h> //Do we need this?
 #include <windef.h>
 #include <winbase.h>
 #include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
+//#include <malloc.h> //Not defined by C99
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -137,21 +147,7 @@
 #define IFTODT(mode) ((mode) & S_IFMT)
 #define DTTOIF(type) (type)
 
-/*
- * File type macros.  Note that block devices, sockets and links cannot be
- * distinguished on Windows and the macros S_ISBLK, S_ISSOCK and S_ISLNK are
- * only defined for compatibility.  These macros should always return false
- * on Windows.
- */
- /*
-#define	S_ISFIFO(mode) (((mode) & S_IFMT) == S_IFIFO)
-#define	S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
-#define	S_ISREG(mode)  (((mode) & S_IFMT) == S_IFREG)
-#define	S_ISLNK(mode)  (((mode) & S_IFMT) == S_IFLNK)
-#define	S_ISSOCK(mode) (((mode) & S_IFMT) == S_IFSOCK)
-#define	S_ISCHR(mode)  (((mode) & S_IFMT) == S_IFCHR)
-#define	S_ISBLK(mode)  (((mode) & S_IFMT) == S_IFBLK)
-*/
+
 /* Return the exact length of d_namlen without zero terminator */
 #define _D_EXACT_NAMLEN(p) ((p)->d_namlen)
 
@@ -338,63 +334,8 @@ _wopendir(
     return dirp;
 }
 
-/*
- * Read next directory entry.  The directory entry is returned in dirent
- * structure in the d_name field.  Individual directory entries returned by
- * this function include regular files, sub-directories, pseudo-directories
- * "." and ".." as well as volume labels, hidden files and system files.
- */
-/*static struct _wdirent*
-_wreaddir(
-    _WDIR *dirp)
-{
-    WIN32_FIND_DATAW *datap;
-    struct _wdirent *entp;
 
-    //Read next directory entry 
-    datap = dirent_next (dirp);
-    if (datap) {
-        size_t n;
-        DWORD attr;
-        
-        //Pointer to directory entry to return
-        entp = &dirp->ent;
 
-      
-        n = 0;
-        while (n + 1 < PATH_MAX  &&  datap->cFileName[n] != 0) {
-            entp->d_name[n] = datap->cFileName[n];
-            n++;
-        }
-        dirp->ent.d_name[n] = 0;
-
-        // Length of file name excluding zero terminator 
-        entp->d_namlen = n;
-
-        //File type
-        attr = datap->dwFileAttributes;
-        if ((attr & FILE_ATTRIBUTE_DEVICE) != 0) {
-            entp->d_type = DT_CHR;
-        } else if ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-            entp->d_type = DT_DIR;
-        } else {
-            entp->d_type = DT_REG;
-        }
-
-       // Reset dummy fields
-        entp->d_ino = 0;
-        entp->d_reclen = sizeof (struct _wdirent);
-
-    } else {
-
-        // Last directory entry read 
-        entp = NULL;
-
-    }
-
-    return entp;
-}
-*/
 /*
  * Close directory stream opened by opendir() function.  This invalidates the
  * DIR structure as well as any directory entry read previously by
@@ -431,25 +372,7 @@ _wclosedir(
     return ok;
 }
 
-/*
- * Rewind directory stream such that _wreaddir() returns the very first
- * file name again.
- */
- /*
-static void
-_wrewinddir(
-    _WDIR* dirp)
-{
-    if (dirp) {
-        //Release existing search handle 
-        if (dirp->handle != INVALID_HANDLE_VALUE) {
-            FindClose (dirp->handle);
-        }
 
-        //Open new search handle
-        dirent_first (dirp);
-    }
-}*/
 
 /* Get first directory entry (internal) */
 static WIN32_FIND_DATAW*
@@ -834,4 +757,3 @@ dirent_set_errno(
 }
 #endif
 #endif /*DIRENT_H*/
-
