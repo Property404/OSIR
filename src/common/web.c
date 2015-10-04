@@ -5,7 +5,7 @@
 #else
 	#include <sys/socket.h>
 #endif
-#define REPLY_LENGTH 20000
+#define REPLY_LENGTH 200000
 
 int sendHTTPRequest(char **server_reply,const char* hostname, const char* message){
 	//Allocate memory to prepare server reply

