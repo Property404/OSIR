@@ -14,9 +14,7 @@
 		//System
 		bool is_win;//Windows
 		bool is_elf;//Linux
-		bool is_macho;//OSX
 		bool is_native;
-		bool is_managed;//i.e: .NET
 		
 		
 	} Executable;

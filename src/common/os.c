@@ -1,5 +1,6 @@
-#include "thirdparty/dirent.h"
+#include "common.h"
 #include "os.h"
+#include "thirdparty/dirent.h"
 #include <time.h>
 #include <sys/utime.h>
 #define MAX_FILE_NAME_LENGTH 255
@@ -47,7 +48,7 @@ char** walkDir(const char* top){
 							
 							//Reallocate ls
 							ls=(char**)realloc(ls,(lscount+2)*sizeof(char*));
-							if(ls==NULL){printf("ALLOCATION ERROR\n");break;}
+							if(ls==NULL){fprintf(stderr,"Error: walkDir: Allocation Error\n");break;}
 							
 							//Add new file to ls
 							ls[lscount]=(char*)malloc(strlen(newls[i])+1);
@@ -65,7 +66,7 @@ char** walkDir(const char* top){
 				}else{
 					//Reallocate ls
 					ls=(char**)realloc(ls,(lscount+2)*sizeof(char*));
-					if(ls==NULL){printf("ALLOCATION ERROR\n");break;}
+					if(ls==NULL){fprintf(stderr,"Error: walkDir: Allocation Error\n");break;}
 					
 					//Add new file to ls
 					ls[lscount]=(char*)malloc(strlen(entpath)+1);
@@ -142,7 +143,6 @@ struct Executable* getExecType(const char* filename){
 	exectype->is_win=0;
 	exectype->is_elf=0;
 	exectype->is_native=0;
-	exectype->is_managed=0;
 	exectype->is_exec=0;
 
 	//Open binary file
@@ -181,14 +181,6 @@ struct Executable* getExecType(const char* filename){
 		#endif
 	}
 	
-	//OS X (FE ED FA CF)
-	else if(binary[0]=='\xfe' && binary[1]=='\xed' && binary[2]=='\xfa' && binary[3]=='\xcf'){
-		exectype->is_macho=1;
-		exectype->is_exec=1;
-		#if defined(__APPLE__) && defined(__MACH__)
-			exectype->is_native=1;
-		#endif
-	}
 	
 	//Free memory
 	free(binary);
@@ -199,12 +191,7 @@ struct Executable* getExecType(const char* filename){
 
 
 int64_t getFileSize(const char* filename){
-	#ifdef _WIN32
-		struct _stat64 st;
-		_stat64(filename, &st);
-	#else
-		struct stat64 st;
-		stat64(filename, &st);
-	#endif
+	struct stat64 st;
+	stat64(filename, &st);
 	return st.st_size;
 }

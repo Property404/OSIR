@@ -50,13 +50,11 @@
 #endif
 
 #include <stdio.h>
-//#include <stdarg.h> //Do we need this?
 #include <windef.h>
 #include <winbase.h>
-#include <wchar.h>
+//#include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
-//#include <malloc.h> //Not defined by C99
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>

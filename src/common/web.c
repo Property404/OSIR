@@ -7,6 +7,7 @@
 #endif
 #define REPLY_LENGTH 200000
 
+
 int sendHTTPRequest(char **server_reply,const char* hostname, const char* message){
 	//Allocate memory to prepare server reply
 	*server_reply=(char*)malloc(sizeof(char)*REPLY_LENGTH);
@@ -21,7 +22,7 @@ int sendHTTPRequest(char **server_reply,const char* hostname, const char* messag
     //Initialize Winsock
     if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
     {
-        fprintf(stderr,"Failed. Error Code : %d\n",WSAGetLastError());
+        fprintf(stderr,"Error: sendHTTPRequest: (errcode %d)\n",WSAGetLastError());
         return 0;
     }
      
@@ -29,7 +30,8 @@ int sendHTTPRequest(char **server_reply,const char* hostname, const char* messag
     //Create a socket
     if((s = socket(AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET)
     {
-        fprintf(stderr,"Could not create socket : %d\n" , WSAGetLastError());
+        fprintf(stderr,"Error: sendHTTPRequest: Could not create socket (errcode %d)\n" , WSAGetLastError());
+		return 0;
     }
  
   
@@ -42,7 +44,7 @@ int sendHTTPRequest(char **server_reply,const char* hostname, const char* messag
     //Connect to remote server
     if (connect(s , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
-		fprintf(stderr,"connect error\n");
+		fprintf(stderr,"Error: sendHTTPRequest: connect error\n");
         return 0;
     }
      
@@ -50,7 +52,7 @@ int sendHTTPRequest(char **server_reply,const char* hostname, const char* messag
 	//Send message
     if( send(s , message , strlen(message) , 0) < 0)
     {
-        fprintf(stderr,"Send failed\n");
+        fprintf(stderr,"Error: sendHTTPRequest: Send failed\n");
         return 0;
     }
      
@@ -70,7 +72,7 @@ int sendHTTPRequest(char **server_reply,const char* hostname, const char* messag
 }
 
 
-char* getHTML(const char* url){
+char* getHypertext(const char* url){
 	//Parse URL
 	
 	//Define vars and allocate memory
@@ -111,11 +113,9 @@ char* getHTML(const char* url){
 	}else{
 		strcpy(url_hostname,tempstring);
 	}
-	free(tempstring);
 	if(strcmp(url_object,"\0")){
 		strcat(url_object,"\0");
 	}
-	//printf("Type: %s\nHostname: %s\nObject: %s\n",url_type,url_hostname,url_object);
 	
 	//Form get request
 	char* get_request=(char*)malloc(strlen(url_object)+strlen(url_hostname)+strlen(url_object)+25);
@@ -143,6 +143,7 @@ char* getHTML(const char* url){
 		}
 
 	}	
+	free(tempstring);
 	free(url_object);
 	free(url_hostname);
 	free(get_request);

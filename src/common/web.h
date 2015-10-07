@@ -8,5 +8,5 @@
 	int sendHTTPRequest(char **reply,const char* hostname, const char* request);
 
 	//Send GET request and receive body of response
-	char* getHTML(const char* url);
+	char* getHypertext(const char* url);
 #endif
