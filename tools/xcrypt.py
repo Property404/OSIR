@@ -6,20 +6,28 @@ _XOR_KEY_SIZE=8
 
 #xor two strings
 def xor_str(s1,s2):
-	print([a for a in s2]);
+	#print([a for a in s2]);
 	return bytearray(s1[i]^s2[i%_XOR_KEY_SIZE] for i in range(len(s1)))
 
 
 #xor msg with random key, encode in b64
 def encrypt(msg):
+	msg+=bytearray([msg[0]^msg[len(msg)-1]])
 	key=urandom(_XOR_KEY_SIZE);
 	return (base64.b64encode((key+xor_str(msg,key))))+b"=";
 	
 
-#Undo encrypt, for testing
+#Undo encrypt
 def decrypt(msg):
-	msg=base64.b64decode(msg)
-	return xor_str(bytearray(i for i in msg[_XOR_KEY_SIZE::]),msg[0:_XOR_KEY_SIZE]);
+	try:
+		msg=base64.b64decode(msg)
+	except base64.binascii.Error:
+		print("File not in base64");
+		exit(1);
+	rmsg=xor_str(bytearray(i for i in msg[_XOR_KEY_SIZE::]),msg[0:_XOR_KEY_SIZE]);
+	if(rmsg[0] ^ rmsg[-2]==rmsg[-1]):return rmsg[0:-1]
+	print("Integrity check failed");
+	exit(1);
 
 
 #Make encrypted file
@@ -59,5 +67,3 @@ if __name__=="__main__":
 		fp.close();		
 	else:
 		encrypt_file(argv[1],argv[2]);
-	
-	
