@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>OSIR - Open Source Infectious Ransomware</title>
+		<link rel="stylesheet" href="style/main.css" type="text/css">
+	</head>
+	<body>
+		<div class="hcentral">
+		<h1>OSIR</h1>
+		
+		OSIR, Open Source Infectious Ransomware, is an open source class
+		project by <a href="https://github.com/Irie88">Sarah
+		Brickner</a> and <a href="https://github.com/Property404">Dagan
+		Martinez</a> at Florida Polytechnic University.
+		
+		<p>The goal of the project is to create a cross-platform self
+		replicating malware that looks for desired files and encrypts
+		them with an RSA encrypted AES key, holding them ransom until
+		the desired amount (default 0 BTC) is payed.
+		
+		<p><a href="https://github.com/Property404/OSIR">OSIR on GitHub
+		</a>
+
+		<p><br><br><strong>Prototypes</strong>
+		<br><a href="http://daganmartinez.com/prototypes/OSIR_prototype_0_ransomware.zip">
+		OSIR_prototype_0_ransomware</a><br>Scrapped ransomware prototype
+		programmed in Python. This is a very small, quickly written
+		prototype that uses RSA and a Blowfish cipher to encrypt the
+		__pycache__ directory and redirect the host owner to a
+		site(localhost) that gives them the decryption key.
+		
+		<br><br><a href="http://daganmartinez.com/prototypes/OSIR_prototype_0_replicator.zip">
+		OSIR_prototype_0_replicator</a><br>Scrapped replicator
+		prototype programmed in C++. This is a very large prototype that
+		includes an entire compiler binary in the source code. It works
+		by writing C code that includes a target file as well as a
+		malicious file, and compiling that code. Being about 1 MB, this
+		is a very bulky prototype.
+		
+		<br><br><a href="http://daganmartinez.com/prototypes/OSIR_prototype_1_replicator.zip">
+		OSIR_prototype_1_replicator</a><br>Replicator prototype forked
+		from main branch, programmed in C. This is very light compared
+		to prototype 0 replicator, being about 10 KB when compiled with
+		the Tiny C Compiler, or a little over 1% of the previous
+		prototype's size.
+		</div>
+	</body>
+</html>

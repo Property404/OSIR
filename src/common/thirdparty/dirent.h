@@ -52,7 +52,6 @@
 #include <stdio.h>
 #include <windef.h>
 #include <winbase.h>
-//#include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>

@@ -70,7 +70,7 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 	
 	//Get own bytes
 	(*bytes)=(char*)malloc(sizeof(char)*size);
-	fread(bytes,1,size,self_fp);
+	fread(*bytes,1,size,self_fp);
 	
 	//Clean up
 	fclose(self_fp);
