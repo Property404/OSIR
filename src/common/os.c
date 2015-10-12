@@ -42,8 +42,7 @@ char** walkDir(const char* top){
 					if(strcmp(ent->d_name,".\0") && strcmp(ent->d_name,"..\0")){
 						
 						//Add files from subdirectory
-						char** newls=(char**)malloc(1);
-						newls=walkDir(entpath);
+						char** newls=walkDir(entpath);
 						for(unsigned int i=0;strcmp(newls[i],"\0");i++){
 							
 							//Reallocate ls
