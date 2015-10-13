@@ -14,27 +14,31 @@
 			</li>
 		</ul>
 		<ul>
-			<li class="headerlink">Account &nbsp; &nbsp;
+			<li class="headerlink">Server &nbsp; &nbsp;
 			<ul>
+			<li><a href="?op=manfile">File Editor</a></li>
 			<li><a href="?op=changepwd">Change Password</a></li><br>
-			<li><a href="logout.php">Logout</a></li><br>
 			</ul>
 			</li>
 		</ul>
 		<ul>
-			<li class="headerlink">Help &nbsp; &nbsp;
+			<li class="headerlink">Info &nbsp; &nbsp;
 			<ul>
+			<li><a href="?op=help">Help</a></li><br>
 			<li><a href="https://github.com/Property404/OSIR">GitHub</a></li><br>
-			<li><a href="?op=help">Help Page</a></li><br>
 			</ul>
 			</li>
 		</ul>
+		<ul>
+			<li class="headerlink">Session &nbsp; &nbsp;
+			<ul>
+			<li><a href="?op=logout">Logout</a></li><br>
+			</ul>
+		</ul>
+		<div style="text-align: right;left-margin: 50px;line-height:1.5em;" class="headerlink">OSIR Control Panel <code>v.p.0.1</code>&nbsp;&nbsp;</div>
 	</div>
 <?php
 			if($_SESSION['default_password']=='true'){
-				echo('<div class="hcentral"><div class="alert">You are using the default password. Please change it immediately.</div></div>');
-			}else
-			if(!isset($_SERVER["HTTPS"]) || $_SERVER["HTTPS"]=='off'){
-				echo('<div class="hcentral"><div class="alert">You are using HTTP. Please switch to HTTPS.</div></div>');
+				echo('<div style="background-color: red;text-align: center;color:white;">You are using the default password. Please change it immediately.</div>');
 			}
 ?>

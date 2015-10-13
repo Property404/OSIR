@@ -5,9 +5,7 @@ class Security{
 	const DEFAULT_PASSWORD="hunter2";
 	const _SALT_LENGTH=128;
 	const _HASH_ALGO="sha256";
-	const _HASH_ROUNDS=123456;/*I made this a number weird
-								to be easier to read. Also,
-								hash rounds are delicious.*/
+	const _HASH_ROUNDS=123456;/*Hash rounds are delicious.*/
 
 	//Generating salt
 	static function genSalt(){

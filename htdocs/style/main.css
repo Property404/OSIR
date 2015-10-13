@@ -38,7 +38,7 @@ input[type="text"],input[type="password"]{
 }
 
 input[type="submit"]{
-	border-radius:10px;
+	border-radius:6px;
 	font-size: 14px;
 	text-align: center;
 	
@@ -68,6 +68,7 @@ input[type="submit"]:focus{
     position: absolute;
     left: 0; right: 0;
 }
+
 .alert{
 	color: #ff0000;
 }
