@@ -15,7 +15,6 @@
 	//OSIR root directory
 	#define SERVER_OSIR_HOME SERVER_HOSTNAME "/osir"
 	
-	
 	//These should be the same size
 	#define XBIN_WIN64 "/xbinaries/x_win64"
 	#define XBIN_ELF64 "/xbinaries/x_elf64"

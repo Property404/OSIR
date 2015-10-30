@@ -52,11 +52,6 @@ LICENCE:        Copyright (c) 2001 Bob Trower, Trantor Standard Systems Inc.
 #include "b64.h"
 
 /*
-** Translation Table as described in RFC1113
-*/
-const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-/*
 ** Translation Table to decode (created by author)
 */
 const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
@@ -84,45 +79,45 @@ void decodeblock( unsigned char *in, unsigned char *out )
 unsigned int b64decode(char** output, const char* intext)
 {
 	*output=(char*)malloc(sizeof(char)*strlen(intext));
-    unsigned char in[4];
-    unsigned char out[3];
-    int v;
-    int i, len;
+	unsigned char in[4];
+	unsigned char out[3];
+	int v;
+	int i, len;
 	unsigned int b=0;
 	int a=0;
 	*in = (unsigned char) 0;
 	*out = (unsigned char) 0;
-    for(a=0;intext[a]!='\0';){
-        for( len = 0, i = 0; i < 4 && intext[a]!='\0'; i++ ) {
-            v = 0;
-            while( intext[a]!='\0' && v == 0 ) {
-                v = intext[a++];
-                if( v != EOF ) {
-	                v = ((v < 43 || v > 122) ? 0 : (int) cd64[ v - 43 ]);
+	for(a=0;intext[a]!='\0';){
+		for( len = 0, i = 0; i < 4 && intext[a]!='\0'; i++ ) {
+			v = 0;
+			while( intext[a]!='\0' && v == 0 ) {
+				v = intext[a++];
+				if( v != EOF ) {
+					v = ((v < 43 || v > 122) ? 0 : (int) cd64[ v - 43 ]);
 					if( v != 0 ) {
 						v = ((v == (int)'$') ? 0 : v - 61);
 					}
-                }
-            }
-            if( intext[a]!='\0' ) {
-                len++;
-                if( v != 0 ) {
-                    in[ i ] = (unsigned char) (v - 1);
-                }
-            }
-            else {
-                in[i] = (unsigned char) 0;
-            }
-        }
-        if( len > 0 ) {
-            decodeblock( in, out );
-            for( i = 0; i < len - 1; i++ ) {
+				}
+			}
+			if( intext[a]!='\0' ) {
+				len++;
+				if( v != 0 ) {
+					in[ i ] = (unsigned char) (v - 1);
+				}
+			}
+			else {
+				in[i] = (unsigned char) 0;
+			}
+		}
+		if( len > 0 ) {
+			decodeblock( in, out );
+			for( i = 0; i < len - 1; i++ ) {
 				(*output)[b++]=out[i];
 				(*output)[b]=out[i+1];
-            }
-        }
-    }
+			}
+		}
+	}
 	
 	//Return size of output
-    return b;
+	return b;
 }

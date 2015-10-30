@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common/clonelib.h"
-#include "common/settings.h"
+#include "common/common.h"
 
 void locateExternalDrive(char** path){
 	*path=(char*) malloc(sizeof(char)*strlen("placeholder"));

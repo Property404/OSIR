@@ -1,12 +1,13 @@
 <!DOCTYPE HTML>
 <html>
-	<head><title></title>
+	<head>
+	<title>Error</title>
 	<link rel="stylesheet" href="style/main.css">
 	</head>
 	<body>
-	<div class="hcentral">
+	<div class="topcenter">
 	<?php
-		//Custom error message to prevent information leaking
+		//Custom error message to control information leaking
 		$code=$_GET["c"];
 		echo("<h1>Error - $code</h1>");
 		switch ($code){
@@ -53,4 +54,3 @@
 	</div>
 	</body>
 </html>
-

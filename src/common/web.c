@@ -12,13 +12,14 @@
 #endif
 #define SERVER_REPLY_LENGTH 200000
 #define HTTP_PORT_NUMBER 80
+
 int sendHTTPRequest(char **server_reply,const char* hostname, const char* message){
 	//Allocate memory to prepare server reply
 	*server_reply=(char*)malloc(sizeof(char)*SERVER_REPLY_LENGTH);
 
 	//Unix socket code
 	#ifndef _WIN32
-		int sockfd, n;
+		int sockfd;
 		struct sockaddr_in serv_addr;
 		struct hostent *server;
 		
