@@ -156,7 +156,6 @@ char* getHypertext(const char* url){
 	strcat(get_request," HTTP/1.1\r\nHost: ");
 	strcat(get_request,url_hostname);
 	strcat(get_request,"\r\n\r\n");
-	
 	//Get HTTP response
 	char* reply;
 	char* html=(char*)malloc(SERVER_REPLY_LENGTH*sizeof(char));

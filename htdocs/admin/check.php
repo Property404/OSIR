@@ -4,9 +4,12 @@
 <div class='midcenter'>
 <?php
 	/*This module checks if login info is correct*/
-
+	//Set error reporting
+	error_reporting(E_ALL);
+	
 	//Import necessary modules
 	include("../mods/session.php");
+	include("../mods/security.php");
 	
 	//Connect to database
 	$link=Session::forceConnectDB();

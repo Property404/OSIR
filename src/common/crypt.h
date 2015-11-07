@@ -1,14 +1,18 @@
 /*
-	OSIR's encryption interface
+	OSIR's semi-generic encryption
+	interface
 */
-const int RSA_KEY_SIZE=1024;//bits
-const int AES_KEY_SIZE=128;//bits
-const int AES_IV_SIZE=64;//bits
+#ifndef HEADER_CRYPT
+	#define HEADER_CRYPT
+	#include <stdbool.h>
 
-//Symmetric encryption;
-int aesEncrypt(char** ciphertext,char* key,char* plaintext);
-int aesDecrypt(char** plaintext,char* key,char* ciphertext);
-char** generateKey(int size);
+	//Symmetric encryption and decryption
+	unsigned int symEncrypt(char** ciphertext,const char* key,const char* plaintext, const unsigned int ptsize);
+	unsigned int symDecrypt(char** plaintext, const char* key, const char* ciphertext, const unsigned int ctsize);
 
-//Asymmetric encryption
-int rsaEncrypt(char** ciphertext,char* pubkey,char* plaintext);
+	//Secure random number generation
+	bool secureRand(char** output,int size);
+	
+	//Generate random key (secureRand with size SYMMETRIC_KEY_SIZE)
+	bool genKey(char** output);
+#endif

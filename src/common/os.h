@@ -1,5 +1,7 @@
 /*
-  Operating system related structs and functions
+	This module provides OSIR
+	with a generic-ish interface
+	with the operating system
 */
 #ifndef HEADER_OS
 	#define HEADER_OS 1

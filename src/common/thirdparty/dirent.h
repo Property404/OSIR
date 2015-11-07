@@ -25,7 +25,7 @@
  * $Id: dirent.h,v 1.20 2014/03/19 17:52:23 tronkko Exp $
  */
  
- //Unix
+//Unix
 #if !defined(_WIN32) && !defined(DIRENT_H)
 	#include <dirent.h>
 	#ifndef DIRENT_H

@@ -29,12 +29,12 @@ int decryptRemoteBytes(char** decrypted_msg, const char* url){
 	}
 
 	//Perform one-byte Integrity check
-	if (*decrypted_msg[raw_msg_size-XOR_KEY_SIZE-1]!=(*decrypted_msg[0] ^ *decrypted_msg[raw_msg_size-XOR_KEY_SIZE-2]))
+	if ((*decrypted_msg)[raw_msg_size-XOR_KEY_SIZE-1]!=((*decrypted_msg)[0] ^ (*decrypted_msg)[raw_msg_size-XOR_KEY_SIZE-2])){
 		fprintf(stderr,"Error: getRemoteBytes: integrity check failed\n");
 		return -1;
+	}
 	
 	//Deallocate memory
 	free(decoded_msg);
-		
 	return raw_msg_size-XOR_KEY_SIZE-1;
 }

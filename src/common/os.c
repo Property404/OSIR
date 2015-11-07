@@ -15,11 +15,17 @@ char** walkDir(const char* top){
 	struct dirent *ent;
 	struct stat statbuf;
 	
-	//Other variables
+	//Entity(file or directory) path
 	char* entpath;
+	
+	//List of files
 	char** ls=(char**)malloc(1*sizeof(char*));
+	
+	//Allocate first list element
 	ls[0]=(char*)malloc(1*sizeof(char));
 	strcpy(ls[0],"\0");
+	
+	//ls element count
 	unsigned int lscount=0;
 	
 	//Recursively cycle through directories
@@ -155,7 +161,7 @@ struct Executable* getExecType(const char* filename){
 	fseek(bf,0,SEEK_END);
 	unsigned int bf_size=ftell(bf);
 	fseek(bf,0,SEEK_SET);
-	if(bf_size==0){printf("Warning - os.c - bf_size==0\n");return exectype;}
+	if(!bf_size){printf("Warning - os.c - bf_size==0\n");return exectype;}
 
 	//Read and close file
 	char* binary=(char*)malloc(sizeof(char)*bf_size);

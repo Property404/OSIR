@@ -1,5 +1,4 @@
 /*********************************************************************\
-
 MODULE NAME:    b64.c
 
 AUTHOR:         Bob Trower 08/04/01
@@ -51,18 +50,13 @@ LICENCE:        Copyright (c) 2001 Bob Trower, Trantor Standard Systems Inc.
 #include <string.h>
 #include "b64.h"
 
-/*
-** Translation Table to decode (created by author)
-*/
+//Translation Table to decode (created by original author)
 const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
 
+//Hex "A" character.  Set to lowercase or uppercase
+const char HEX_A='a';
 
-
-/*
-** decodeblock
-**
-** decode 4 '6-bit' characters into 3 8-bit binary bytes
-*/
+//decode 4 '6-bit' characters into 3 8-bit binary bytes
 void decodeblock( unsigned char *in, unsigned char *out )
 {   
     out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
@@ -70,12 +64,7 @@ void decodeblock( unsigned char *in, unsigned char *out )
     out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
 }
 
-/*
-** decode
-**
-** decode a base64 encoded stream discarding padding, line breaks and noise
-*/
-
+//decode a base64 encoded stream discarding padding, line breaks and noise
 unsigned int b64decode(char** output, const char* intext)
 {
 	*output=(char*)malloc(sizeof(char)*strlen(intext));
@@ -120,4 +109,32 @@ unsigned int b64decode(char** output, const char* intext)
 	
 	//Return size of output
 	return b;
+}
+
+//Encode in hex
+char* b16encode(const char* intext,unsigned int length){
+	char* output=(char*)malloc(sizeof(char)*(length*2+1));
+	
+	for(unsigned int i=0;i<length;i++){
+		//Check divisibility by 16
+		output[2*i]=intext[i]/16+(intext[i]/16>9?HEX_A-10:'0');
+		
+		//Check mod 16
+		output[2*i+1]=intext[i]%16+(intext[i]%16>9?HEX_A-10:'0');
+		
+		//End string
+		output[2*i+2]='\0';
+	}
+	return output;
+}
+
+//Decode from hex
+char* b16decode(const char* intext){
+	char* output=(char*)malloc(sizeof(char)*strlen(intext)/2);
+	
+	//Merge every two bytes into one byte
+	for(unsigned int i=0;i<strlen(intext)/2;i++)
+		output[i]=(intext[2*i]-(intext[2*i]>HEX_A?HEX_A-10:'0'))*16
+					+intext[2*i+1]-(intext[2*i+1]>HEX_A?HEX_A-10:'0');
+	return output;
 }

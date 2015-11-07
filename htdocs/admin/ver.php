@@ -1,3 +1,3 @@
 <?php
-	define("OCP_VERSION","pa.0.5");
+	define("OCP_VERSION","pa.0.6");
 ?>

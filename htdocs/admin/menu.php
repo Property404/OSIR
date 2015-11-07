@@ -25,7 +25,7 @@
 		<ul>
 			<li class="headerlink">Info &nbsp; &nbsp;
 			<ul>
-			<li><a href="?op=help">Help</a></li>
+			<li><a href="?op=help&page=0">Help</a></li>
 			<li><a href="https://github.com/Property404/OSIR">GitHub</a></li>
 			</ul>
 			</li>

