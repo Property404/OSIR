@@ -1,7 +1,0 @@
-#include <stdio.h>
-int main(){
-	int i;
-	for(i=0;i<6;i++)
-		printf((i%2)?"Don't know why ":"you say goodbye, I say hello\nHello Hello\n");
-	return 0;
-}
