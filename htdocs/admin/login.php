@@ -14,7 +14,7 @@
 				
 				//Check if already logged in
 				session_start();
-				if(array_key_exists('session',$_SESSION)){
+				if(array_key_exists('admin_session',$_SESSION)){
 					header("Location: ./");
 				}
 				

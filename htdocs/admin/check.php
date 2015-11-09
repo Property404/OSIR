@@ -19,12 +19,15 @@
 	
 	//Verify hash
 	$correct_hash=mysqli_fetch_row(mysqli_query($link,"select HASH from admin where ID=1"))[0];
-	if(Security::makeSaltedHash($_POST["password"],$correct_hash)==$correct_hash){
+	$this_hash=Security::makeSaltedHash($_POST["password"],$correct_hash);
+
+	if($this_hash==$correct_hash){
 		
 		//Correct hash - start session
 		session_start();
-		$_SESSION['session']="valid";
+		$_SESSION['admin_session']="valid";
 		$_SESSION['default_password']="false";
+		$_SESSION['timeout']=time();
 		if($_POST["password"]==Security::DEFAULT_PASSWORD){
 			$_SESSION['default_password']="true";
 		}
@@ -34,6 +37,8 @@
 		
 		//Go to index
 		header("Location: ./");
+	}else if (!$this_hash ||!$correct_hash){
+		header("Location: login.php?error");
 	}else{
 		//Increment attempts
 		$attempts++;

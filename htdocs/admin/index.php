@@ -8,7 +8,6 @@ Most OCP functionalities are implemented here-->
 		<link rel="stylesheet" href="../style/menu.css">
 	</head>
 	<body>
-		<iframe src="http://example.com"></iframe>
 		<?php
 			error_reporting(E_ALL);
 			include("menu.php");
@@ -19,7 +18,7 @@ Most OCP functionalities are implemented here-->
 		<div class="midcenter">
 		<?php
 			//Define functions here
-			function escapeText($text, $tabWidth)
+			function escapeText($text)
 			{
 				$text=str_replace("&","&amp;",$text);
 				$text=str_replace("<","&lt;",$text);
@@ -30,7 +29,7 @@ Most OCP functionalities are implemented here-->
 			function walkDir($dir){
 				$files=scandir($dir);
 				$flist=array();
-			
+				
 				//Go through directory
 				foreach($files as $fn){
 					$path=$dir."/".$fn;
@@ -86,7 +85,7 @@ Most OCP functionalities are implemented here-->
 					echo("<form method='POST' action='?op=updatekeys'>\n<select name='opt'>\n");
 					
 					//Show all RSA keys
-					for($i=1;$i<KeyPair::getHighestID($link);$i++){
+					for($i=1;$i<=KeyPair::getHighestID($link);$i++){
 						$res=(new KeyPair())->sqlImport($link,$i);
 						if($res->isValid())
 							echo("<option".(($current_id==$i)?" selected=true":"").">".$res->toString()."</option>");
@@ -176,10 +175,12 @@ Most OCP functionalities are implemented here-->
 							
 							//Confirmation password doesn't match
 							header("Location: ?op=changepwd&msg=Passwords%20don't%20match");
+							
 						}
 					}else{
 						
 						//Wrong password
+						if(!rand(0,10)){header("Location: ?op=logout");die("");}
 						header("Location: ?op=changepwd&msg=Wrong%20password");
 					}
 				}
@@ -234,6 +235,7 @@ Most OCP functionalities are implemented here-->
 				
 				//Logout
 				else if($_GET["op"]=="logout"){
+					unset($_SESSION);
 					session_destroy();
 					header("Location: login.php");
 				}
@@ -242,7 +244,7 @@ Most OCP functionalities are implemented here-->
 				//Manage files
 				else if($_GET["op"]=="manfile"){
 					//Valid source code extensions
-					$source_extensions=array("html","htm","xml","php","js","cgi","py","perl","css","c","cpp","h","txt","bat","sh");
+					$source_extensions=array("html","htm","xml","js","txt","css");
 					
 					//Write dropdown menu
 					echo("<form method='POST'>\n");
@@ -262,7 +264,7 @@ Most OCP functionalities are implemented here-->
 					
 					//Get file source code
 					if(array_key_exists("file",$_POST)){
-						$file_source=escapeText(file_get_contents($_POST["file"]),4);
+						$file_source=escapeText(file_get_contents($_POST["file"]));
 						echo("<form method='POST' action='?op=save_source&fn=".$_POST["file"]."'>");
 					}else{
 						$file_source="";

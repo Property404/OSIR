@@ -110,6 +110,9 @@
 		}
 		
 		public function displayPage(){
+			//Highlight.js script
+			echo("<script>hljs.initHighlightingOnLoad();</script>");
+			
 			//Write current page
 			echo("<div class='doc'>");
 			echo("<h1>".$this->current_page->title."</h1>\n");

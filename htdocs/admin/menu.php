@@ -1,7 +1,7 @@
 <?php
 	//Return to login screen if not in session
 	include("../mods/session.php");
-	Session::checkSession();
+	Session::checkAdminSession();
 	include("ver.php");
 ?>
 	<div class="menu">

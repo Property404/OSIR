@@ -107,7 +107,8 @@
 			<li>Immediately change your password (<em>server</em>&gt;<em>change password</em>)<br><br></li>
 			</ol>
 			</div>"),
-			new DocPage("Building Client","Building with GNU Compiler Collection is the easiest way to compile OSIR on Windows. In addition, GCC's code output is highly optimized when compared with TCC.<br><br>TCC's output code is generally a lot smaller than GCC's. For example, TCC will compile:<br><code>#include &lt;stdio.h&gt;<br>int main(){printf(\"Hello World\");return 0;}</code><br>into a 2KB file, while GCC will compile it into a 16KB file.
+			new DocPage("Building Client","Building with GNU Compiler Collection is the easiest way to compile OSIR on Windows. In addition, GCC's code output is highly optimized when compared with TCC.<br><br>TCC's output code is generally a lot smaller than GCC's. For example, TCC will compile:<pre><code class=\"c\">#include &lt;stdio.h&gt;
+int main(){printf(\"Hello World\");return 0;}</code></pre>into a 2KB file, while GCC will compile it into a 16KB file.
 			<div style='text-align: left;'>
 			<ol>
 				<li>Edit osir/src/settings.h

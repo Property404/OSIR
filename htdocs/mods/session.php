@@ -10,9 +10,10 @@
 	
 	class Session{
 		//Private Constants
-		const _DB_NAME="osir_admin";
+		const _DB_NAME="OSIR";
 		const _SQL_USERNAME="root";
 		const _SQL_PASSWORD="";
+		const _MAX_SESSION_TIME=12*3600;
 		const _ADMIN_TABLE_DEFINITION="CREATE TABLE ADMIN (
 										ID int(11) AUTO_INCREMENT,
 										HASH varchar(512) NOT NULL,
@@ -32,11 +33,11 @@
 										
 		//Private methods
 		private static function setInitialAdminTable($link){
-			include("../mods/security.php");
+			include_once("../mods/security.php");
 			mysqli_query($link,"INSERT INTO ADMIN (HASH,ATTEMPTS,WIN32_BINARY_LAST_UPDATED,LINUX_BINARY_LAST_UPDATED) VALUES ('".Security::makeSaltedHash(Security::DEFAULT_PASSWORD) . "',0,'Never updated','Never updated')");
 		}
 		private static function setInitialKeysTable($link){
-			include("../mods/keypair.php");
+			include_once("../mods/keypair.php");
 			//Generate keypair and export to database
 			$keypair=new KeyPair();
 			$keypair->generate();
@@ -79,7 +80,7 @@
 		
 		
 		//If not in session, redirect to login page
-		public static function checkSession(){
+		public static function checkAdminSession(){
 			//Make sure using TLS
 			if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
 				header("Location: https://".$_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]);
@@ -87,7 +88,12 @@
 			
 			//Check session
 			session_start();
-			if(!array_key_exists('session',$_SESSION)){
+			if(!array_key_exists('admin_session',$_SESSION)){
+				header("Location: ../admin/login.php");
+			//Twelve hour max time
+			}else if($_SESSION["timeout"]+self::_MAX_SESSION_TIME<time()){
+				unset($_SESSION);
+				session_destroy();
 				header("Location: ../admin/login.php");
 			}
 			
