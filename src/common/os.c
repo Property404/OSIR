@@ -108,8 +108,8 @@ time_t getFileModifiedDate(const char* filename){
 	struct tm lcl_tm=*localtime(&(attrib.st_mtime));
 	time_t dif=mktime(&lcl_tm)-mktime(&gm_tm);
 	
-	//Adjust for DST
-	if((gm_tm).tm_mon>=MARCH && (gm_tm).tm_mon<NOVEMBER)dif+=HOUR;
+	//Adjust
+	dif+=HOUR;
 	
 	//Return time as time_t int
 	return attrib.st_mtime+dif;
@@ -159,7 +159,7 @@ struct Executable* getExecType(const char* filename){
 	
 	//check file size
 	fseek(bf,0,SEEK_END);
-	unsigned int bf_size=ftell(bf);
+	int64_t bf_size=ftell(bf);
 	fseek(bf,0,SEEK_SET);
 	if(!bf_size){printf("Warning - os.c - bf_size==0\n");return exectype;}
 

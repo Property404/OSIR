@@ -9,7 +9,6 @@
 	
 	//Replication Settings
 	#define CROSS_PLATFORM_ON 1
-	#define MAX_EXEC_SIZE 99000 //bytes
 	
 	//Server IP address
 	#define SERVER_HOSTNAME "127.0.0.1"

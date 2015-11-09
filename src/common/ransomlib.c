@@ -38,29 +38,49 @@ int encryptSymmetricKey(char** encrypted_key, const int pubkeyid, const char* ke
 	return ret;
 }
 
-bool partialEncryptFile(const char* key, const char* filename, long int number_of_bytes){
-	
-	//Open target file
-	FILE* fp=fopen(filename,"rb");
-	if(bf==NULL){fprintf(stderr, "Error: partialEncryptFile: could not open file\n");return 0;}
+bool partialEncryptFile(const char* key,const char* iv, const char* filename, int64_t number_of_bytes){
+	printf("%s%s",key,iv);
+	FILE* hostage=fopen(filename,"rb");
+	if(hostage==NULL){
+		fprintf(stderr,"Error: partialEncryptFile: cannot open file\n");
+		return 0;
+	}
 	
 	//Get file size
-	fseek(fp,0,SEEK_END);
-	long int file_size=ftell(fp);
+	fseek(hostage,0,SEEK_END);
+	int64_t file_size=ftell(hostage);
+	fseek(hostage,0,SEEK_SET);
 	
-	//Check for errors
-	if(file_size==-1){fprintf(stderr, "Error: partialEncryptFile: ftell returned error\n");return 0;}
+	//Restrain number_of_bytes to file size
+	number_of_bytes=file_size>number_of_bytes?number_of_bytes:file_size;
 	
-	//Set number_of_bytes to file size if necessary
-	number_of_bytes=file_size<number_of_bytes?file_size:number_of_bytes;
+	//Read bytes for encryption
+	char* plaintext=(char*)malloc(sizeof(char)*number_of_bytes);
+	fread(plaintext,1,number_of_bytes,hostage);
 	
-	//Reset iterator
-	fseek(fp,0,SEEK_SET);
-	
-	//Get first X bytes of file
-	char* clear_bytes=(char*)malloc(sizeof(char)*number_of_bytes);
-	for(long int i=0;i<number_of_bytes){
-		
+	//Encrypt bytes
+	char* ciphertext=(char*)malloc(sizeof(char)*number_of_bytes+1);
+	if(ciphertext==NULL)
+		fprintf(stderr,"Warning: partialEncryptFile: memory allocation problem\n");
+	for(int64_t i=0;i<number_of_bytes;i++){
+		ciphertext[i]='j';
 	}
+	
+	
+	//Close then open to write
+	fclose(hostage);
+	hostage=fopen(filename,"r+b");
+	
+	//Write bytes
+	if(fwrite(ciphertext,1,number_of_bytes,hostage)!=(unsigned long)number_of_bytes){
+		fprintf(stderr,"Error: partialEncryptFile: writing failed\n");
+		return 0;
+	}
+	
+	//cleanup
+	fclose(hostage);
+	free(plaintext);
+	free(ciphertext);
+	return 1;
 	
 }

