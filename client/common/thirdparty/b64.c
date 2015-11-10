@@ -115,12 +115,13 @@ unsigned int b64decode(char** output, const char* intext)
 char* b16encode(const char* intext,unsigned int length){
 	char* output=(char*)malloc(sizeof(char)*(length*2+1));
 	
-	for(unsigned int i=0;i<length;i++){
+	unsigned int i;
+	for(i=0;i<length;i++){
 		//Check divisibility by 16
-		output[2*i]=intext[i]/16+(intext[i]/16>9?HEX_A-10:'0');
+		output[2*i]=(unsigned char)intext[i]/16+((unsigned char)intext[i]/16>9?HEX_A-10:'0');
 		
 		//Check mod 16
-		output[2*i+1]=intext[i]%16+(intext[i]%16>9?HEX_A-10:'0');
+		output[2*i+1]=(unsigned char)intext[i]%16+((unsigned char)intext[i]%16>9?HEX_A-10:'0');
 		
 		//End string
 		output[2*i+2]='\0';
@@ -130,11 +131,20 @@ char* b16encode(const char* intext,unsigned int length){
 
 //Decode from hex
 char* b16decode(const char* intext){
-	char* output=(char*)malloc(sizeof(char)*strlen(intext)/2);
+	char* output=(char*)malloc(sizeof(char)*strlen(intext)/2+1);
 	
 	//Merge every two bytes into one byte
-	for(unsigned int i=0;i<strlen(intext)/2;i++)
-		output[i]=(intext[2*i]-(intext[2*i]>HEX_A?HEX_A-10:'0'))*16
-					+intext[2*i+1]-(intext[2*i+1]>HEX_A?HEX_A-10:'0');
+	unsigned int i;
+	for(i=0;i<strlen(intext)/2;i++)
+		output[i]=
+	
+			//Decode first hex char into first four bits
+			(intext[2*i]-(intext[2*i]>HEX_A?HEX_A-10:'0'))*16
+			
+			//Decode last hex char into last four bits
+			+intext[2*i+1]-(intext[2*i+1]>HEX_A?HEX_A-10:'0');
+					
+	//Add ending byte and return
+	output[i+1]='\0';
 	return output;
 }

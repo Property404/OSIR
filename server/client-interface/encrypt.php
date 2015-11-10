@@ -9,9 +9,16 @@
 	$keyid=$_GET["keyid"];
 	
 	//Find key pair
-	$rsakey=new KeyPair();
+	$rsakey=new KeyPair(true);
 	$rsakey->sqlImport($link,$keyid);
 	
-	//Output encrypted asymmetric key
-	echo(WeakCrypt::encrypt($rsakey->encrypt($symkey)));
+	//Encrypt symmetric key
+	$encrypted_key=$rsakey->encrypt($symkey);
+	
+	//Make assertion
+	if($symkey!==$rsakey->decrypt($encrypted_key)){
+		die("Assertion Failed");
+	}
+	
+	echo(WeakCrypt::encrypt($encrypted_key));
 ?>

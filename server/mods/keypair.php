@@ -25,6 +25,7 @@
 		
 		//Public instance methods
 		function __construct($can_decrypt=false){
+			$this->can_decrypt=$can_decrypt;
 		}
 		
 		//Generate keys

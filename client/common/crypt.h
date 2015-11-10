@@ -13,7 +13,4 @@
 
 	//Secure random number generation
 	bool secureRand(char** output,int size);
-	
-	//Generate random key (secureRand with size SYMMETRIC_KEY_SIZE)
-	bool genKey(char** output);
 #endif

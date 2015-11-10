@@ -33,11 +33,6 @@ bool secureRand(char** output,const int size){
 	return 1;
 }
 
-//Generate key according to const key size
-bool genKey(char** output){
-	return secureRand(output,SYMMETRIC_KEY_SIZE);
-}
-
 /*
 Current Prototype's encryption scheme: XOR
 This is a placeholder for real encryption

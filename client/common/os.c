@@ -19,14 +19,14 @@ char** walkDir(const char* top){
 	char* entpath;
 	
 	//List of files
-	char** ls=(char**)malloc(1*sizeof(char*));
+	char** ls = (char**)malloc(1*sizeof(char*));
 	
 	//Allocate first list element
-	ls[0]=(char*)malloc(1*sizeof(char));
-	strcpy(ls[0],"\0");
+	ls[0] = (char*)malloc(1*sizeof(char));
+	strcpy(ls[0], "\0");
 	
 	//ls element count
-	unsigned int lscount=0;
+	unsigned int lscount = 0;
 	
 	//Recursively cycle through directories
 	if ((dir = opendir (top)) != NULL) {
@@ -70,11 +70,11 @@ char** walkDir(const char* top){
 					}
 				}else{
 					//Reallocate ls
-					ls=(char**)realloc(ls,(lscount+2)*sizeof(char*));
-					if(ls==NULL){fprintf(stderr,"Error: walkDir: Allocation Error\n");break;}
+					ls = (char**)realloc(ls, (lscount+2)*sizeof(char*));
+					if(ls == NULL){fprintf(stderr,"Error: walkDir: Allocation Error\n");break;}
 					
 					//Add new file to ls
-					ls[lscount]=(char*)malloc(strlen(entpath)+1);
+					ls[lscount] = (char*)malloc(strlen(entpath)+1);
 					strcpy(ls[lscount],entpath);
 					
 					//Append null character
@@ -87,29 +87,29 @@ char** walkDir(const char* top){
 	return ls;
 }
 
-bool setFileModifiedDate(const char* filename,time_t time){
+bool setFileModifiedDate(const char* filename, time_t time){
 	//initialize ut struct
 	struct _utimbuf ut;
 	
 	//Modify  times in struct
-	time-=HOUR;
-	ut.actime=ut.modtime=mktime(gmtime(&time));
+	time -= HOUR;
+	ut.actime = ut.modtime = mktime(gmtime(&time));
 	
 	//Change file's date modified(1 if successful)
-	return (_utime(filename,&ut)!=-1);
+	return (_utime(filename, &ut) != -1);
 }
 
 time_t getFileModifiedDate(const char* filename){
 	struct stat attrib;
-	if(stat(filename, &attrib)!=0)return -1;
+	if(stat(filename, &attrib) != 0)return -1;
 	
 	//Adjust for timezones
-	struct tm gm_tm=*gmtime(&(attrib.st_mtime));
-	struct tm lcl_tm=*localtime(&(attrib.st_mtime));
-	time_t dif=mktime(&lcl_tm)-mktime(&gm_tm);
+	struct tm gm_tm = *gmtime(&(attrib.st_mtime));
+	struct tm lcl_tm = *localtime(&(attrib.st_mtime));
+	time_t dif = mktime(&lcl_tm)-mktime(&gm_tm);
 	
 	//Adjust
-	dif+=HOUR;
+	dif += HOUR;
 	
 	//Return time as time_t int
 	return attrib.st_mtime+dif;
