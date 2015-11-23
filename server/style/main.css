@@ -94,3 +94,16 @@ footer {
 .alert{
 	color: #f00;
 }
+
+.doc {
+	text-align: center;
+	width: 50%;
+	top: 0;
+	overflow: auto;
+	margin: auto;
+	position: absolute;
+	left: 0; right: 0;
+}
+b{
+	color: #00aeff;
+}

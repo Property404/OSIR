@@ -13,7 +13,7 @@
 #define SERVER_REPLY_LENGTH 200000
 #define HTTP_PORT_NUMBER 80
 
-int sendHTTPRequest(char **server_reply,const char* hostname, const char* message){
+bool sendHTTPRequest(char **server_reply,const char* hostname, const char* message){
 	//Allocate memory to prepare server reply
 	*server_reply=(char*)malloc(sizeof(char)*SERVER_REPLY_LENGTH);
 
@@ -160,7 +160,7 @@ char* getHypertext(const char* url){
 	char* reply;
 	char* html=(char*)malloc(SERVER_REPLY_LENGTH*sizeof(char));
 	if(!sendHTTPRequest(&reply,url_hostname,get_request)){
-		strcpy(html,"!ERROR");
+		strcpy(html,"<failed>");
 		
 	}else{
 		//Get html

