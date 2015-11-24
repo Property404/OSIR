@@ -5,7 +5,7 @@
 	$results="";
 	
 	//Check Weakcrypt module
-	$results.="Weakcrypt::en/decrypt:\t".((Weakcrypt::decrypt(Weakcrypt::encrypt($test_string))===$test_string)?"OK\n":"Failed\n");
+	$results.="Weakcrypt::en/decrypt:\t\t".((Weakcrypt::decrypt(Weakcrypt::encrypt($test_string))===$test_string)?"OK\n":"Failed\n");
 	
 	//Check Security module
 	$hash=Security::makeSaltedHash(Security::DEFAULT_PASSWORD);
@@ -13,5 +13,5 @@
 	
 	
 	//Report results
-	echo(str_replace("\n",array_key_exists("client",$_GET)?"\n":"<br>\n",$results));
+	echo(str_replace("\n",array_key_exists("no_html",$_GET)?"\n":"<br>\n",$results));
 ?>
