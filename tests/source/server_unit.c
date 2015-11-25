@@ -17,12 +17,13 @@ int main(int argc, char** argv){argc=argc;
 	if(strcmp(*reply,"OK"))exit(0);
 	
 	//Run backend test
-	printf("\nServer Unit Test Results\n-----------------\n");
+	printf("\nServer Unit Test Results:\n");
 	*reply=getHypertext(SERVER_OSIR_HOME "/client-interface/test.php?no_html");
 	printf("%s",*reply);
 	
 	
 
 	//free(reply);
+	printf("\n");
 	return 0;
 }

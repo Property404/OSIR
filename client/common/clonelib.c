@@ -38,12 +38,12 @@ int64_t getOwnBytes(char** bytes, const char* arg0){
 	
 	//Check for marker
 	bool c;
-	for(int64_t i=0;i<size-3;i++){
+	for(int64_t i=0;i<size-strlen(END_MARKER);i++){
 		for(int j=0;j<END_MARKER_SIZE;j++)
 			c*=(*bytes)[i+j]==END_MARKER[END_MARKER_SIZE-1-j];
 		if(c){
 			printf("Found marker at %i\n",(int)i);
-			size=i+3;
+			size=i+strlen(END_MARKER);
 			break;
 		}
 		c=1;

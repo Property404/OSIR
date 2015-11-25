@@ -1,0 +1,59 @@
+CLIENT UNIT TESTS
+-----------------
+Testing clonelib.h
+getOwnBytes:	OK(17920 bytes)
+Writing bytes
+Setting modified date
+infectTarget:	OK
+
+Testing b64.h
+b64decode:	OK(OK)
+b16en/decrypt:	OK
+
+Testing crypt.h
+secureRand:	OK
+symEncrypt:	OK
+symDecrypt:	OK
+Together:	Failed(á°è±±±)
+
+SERVER UNIT TESTS
+-----------------
+Connection Status(wikipedia):	OK
+Connection Status(OSIR):	OK
+
+Server Unit Test Results:
+Weakcrypt::en/decrypt:		OK
+Security::makeSaltedHash:	OK
+
+INTEGRATION TESTS
+-----------------
+Beginning Infection Integration Test...
+
+Infecting directory (./infection_test):
+./infection_test/hello.exe(native)
+Writing bytes
+Setting modified date
+
+./infection_test/hello_concat.exe(native)
+Writing bytes
+Setting modified date
+
+./infection_test/hello_concat2.exe(native)
+Writing bytes
+Setting modified date
+
+./infection_test/hello_concat3.exe(native)
+Writing bytes
+Setting modified date
+
+Status: OK
+
+Reading own bytes
+Byte length:15872
+
+Comparing...
+Checking ./infection_test/hello.exe...
+Checking ./infection_test/hello_concat.exe...
+Checking ./infection_test/hello_concat2.exe...
+Checking ./infection_test/hello_concat3.exe...
+
