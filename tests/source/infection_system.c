@@ -2,6 +2,7 @@
 #include "../../client/common/common.h"
 #include "../../client/common/os.h"
 #include <stdio.h>
+#include <stdlib.h>
 #define TEST_DIR "./infection_test"
 
 int main(int argc, char** argv){argc=argc;

