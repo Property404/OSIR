@@ -2,8 +2,8 @@
 #include "common.h"
 #include <stdio.h>
 #ifdef _WIN32
-#include "windows.h"
-#include "wincrypt.h"
+#    include "windows.h"
+#    include "wincrypt.h"
 #endif
 
 //Return random bytes

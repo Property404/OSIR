@@ -27,134 +27,142 @@
 
 //Unix
 #if !defined(_WIN32) && !defined(DIRENT_H)
-#include <dirent.h>
-#ifndef DIRENT_H
-#define DIRENT_H
-#endif
+#    include <dirent.h>
+#    ifndef DIRENT_H
+#        define DIRENT_H
+#    endif
 #endif
 
 //Windows
 #ifndef DIRENT_H
-#define DIRENT_H
+#    define DIRENT_H
 
 /*
  * Define architecture flags so we don't need to include windows.h.
  * Avoiding windows.h makes it simpler to use windows sockets in conjunction
  * with dirent.h.
  */
-#if !defined(_68K_) && !defined(_MPPC_) && !defined(_X86_) && !defined(_IA64_) && !defined(_AMD64_) && defined(_M_IX86)
-#   define _X86_
-#endif
-#if !defined(_68K_) && !defined(_MPPC_) && !defined(_X86_) && !defined(_IA64_) && !defined(_AMD64_) && defined(_M_AMD64)
-#define _AMD64_
-#endif
+#    if !defined(_68K_) && !defined(_MPPC_) && !defined(_X86_) && !defined(_IA64_) && !defined(_AMD64_) && defined(_M_IX86)
+#        define _X86_
+#    endif
+#    if !defined(_68K_) && !defined(_MPPC_) && !defined(_X86_) && !defined(_IA64_) && !defined(_AMD64_) && defined(_M_AMD64)
+#        define _AMD64_
+#    endif
 
-#include <stdio.h>
-#include <windef.h>
-#include <winbase.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
+#    include <stdio.h>
+#    include <windef.h>
+#    include <winbase.h>
+#    include <string.h>
+#    include <stdlib.h>
+#    include <sys/types.h>
+#    include <sys/stat.h>
+#    include <errno.h>
 
 /* Indicates that d_type field is available in dirent structure */
-#define _DIRENT_HAVE_D_TYPE
+#    define _DIRENT_HAVE_D_TYPE
 
 /* Indicates that d_namlen field is available in dirent structure */
-#define _DIRENT_HAVE_D_NAMLEN
+#    define _DIRENT_HAVE_D_NAMLEN
 
 /* Entries missing from MSVC 6.0 */
-#if !defined(FILE_ATTRIBUTE_DEVICE)
-#   define FILE_ATTRIBUTE_DEVICE 0x40
-#endif
+#    if !defined(FILE_ATTRIBUTE_DEVICE)
+#        define FILE_ATTRIBUTE_DEVICE 0x40
+#    endif
 
 /* File type and permission flags for stat() */
-#if !defined(S_IFMT)
-#   define S_IFMT   _S_IFMT	/* File type mask */
-#endif
-#if !defined(S_IFDIR)
-#   define S_IFDIR  _S_IFDIR	/* Directory */
-#endif
-#if !defined(S_IFCHR)
-#   define S_IFCHR  _S_IFCHR	/* Character device */
-#endif
-#if !defined(S_IFFIFO)
-#   define S_IFFIFO _S_IFFIFO	/* Pipe */
-#endif
-#if !defined(S_IFREG)
-#   define S_IFREG  _S_IFREG	/* Regular file */
-#endif
-#if !defined(S_IREAD)
-#   define S_IREAD  _S_IREAD	/* Read permission */
-#endif
-#if !defined(S_IWRITE)
-#   define S_IWRITE _S_IWRITE	/* Write permission */
-#endif
-#if !defined(S_IEXEC)
-#   define S_IEXEC  _S_IEXEC	/* Execute permission */
-#endif
-#if !defined(S_IFIFO)
-#   define S_IFIFO _S_IFIFO	/* Pipe */
-#endif
-#if !defined(S_IFBLK)
-#   define S_IFBLK   0		/* Block device */
-#endif
-#if !defined(S_IFLNK)
-#   define S_IFLNK   0		/* Link */
-#endif
-#if !defined(S_IFSOCK)
-#   define S_IFSOCK  0		/* Socket */
-#endif
+#    if !defined(S_IFMT)
+#        define S_IFMT   _S_IFMT	/* File type mask */
+#    endif
+#    if !defined(S_IFDIR)
+#        define S_IFDIR  _S_IFDIR
+				/* Directory */
+#    endif
+#    if !defined(S_IFCHR)
+#        define S_IFCHR  _S_IFCHR
+				/* Character device */
+#    endif
+#    if !defined(S_IFFIFO)
+#        define S_IFFIFO _S_IFFIFO
+				/* Pipe */
+#    endif
+#    if !defined(S_IFREG)
+#        define S_IFREG  _S_IFREG
+				/* Regular file */
+#    endif
+#    if !defined(S_IREAD)
+#        define S_IREAD  _S_IREAD
+				/* Read permission */
+#    endif
+#    if !defined(S_IWRITE)
+#        define S_IWRITE _S_IWRITE
+				/* Write permission */
+#    endif
+#    if !defined(S_IEXEC)
+#        define S_IEXEC  _S_IEXEC
+				/* Execute permission */
+#    endif
+#    if !defined(S_IFIFO)
+#        define S_IFIFO _S_IFIFO	/* Pipe */
+#    endif
+#    if !defined(S_IFBLK)
+#        define S_IFBLK   0	/* Block device */
+#    endif
+#    if !defined(S_IFLNK)
+#        define S_IFLNK   0	/* Link */
+#    endif
+#    if !defined(S_IFSOCK)
+#        define S_IFSOCK  0	/* Socket */
+#    endif
 
-#if defined(_MSC_VER)
-#   define S_IRUSR  S_IREAD	/* Read user */
-#   define S_IWUSR  S_IWRITE	/* Write user */
-#   define S_IXUSR  0		/* Execute user */
-#   define S_IRGRP  0		/* Read group */
-#   define S_IWGRP  0		/* Write group */
-#   define S_IXGRP  0		/* Execute group */
-#   define S_IROTH  0		/* Read others */
-#   define S_IWOTH  0		/* Write others */
-#   define S_IXOTH  0		/* Execute others */
-#endif
+#    if defined(_MSC_VER)
+#        define S_IRUSR  S_IREAD	/* Read user */
+#        define S_IWUSR  S_IWRITE
+				/* Write user */
+#        define S_IXUSR  0	/* Execute user */
+#        define S_IRGRP  0	/* Read group */
+#        define S_IWGRP  0	/* Write group */
+#        define S_IXGRP  0	/* Execute group */
+#        define S_IROTH  0	/* Read others */
+#        define S_IWOTH  0	/* Write others */
+#        define S_IXOTH  0	/* Execute others */
+#    endif
 
 /* Maximum length of file name */
-#if !defined(PATH_MAX)
-#   define PATH_MAX MAX_PATH
-#endif
-#if !defined(FILENAME_MAX)
-#   define FILENAME_MAX MAX_PATH
-#endif
-#if !defined(NAME_MAX)
-#   define NAME_MAX FILENAME_MAX
-#endif
+#    if !defined(PATH_MAX)
+#        define PATH_MAX MAX_PATH
+#    endif
+#    if !defined(FILENAME_MAX)
+#        define FILENAME_MAX MAX_PATH
+#    endif
+#    if !defined(NAME_MAX)
+#        define NAME_MAX FILENAME_MAX
+#    endif
 
 /* File type flags for d_type */
-#define DT_UNKNOWN  0
-#define DT_REG      S_IFREG
-#define DT_DIR      S_IFDIR
-#define DT_FIFO     S_IFIFO
-#define DT_SOCK     S_IFSOCK
-#define DT_CHR      S_IFCHR
-#define DT_BLK      S_IFBLK
-#define DT_LNK      S_IFLNK
+#    define DT_UNKNOWN  0
+#    define DT_REG      S_IFREG
+#    define DT_DIR      S_IFDIR
+#    define DT_FIFO     S_IFIFO
+#    define DT_SOCK     S_IFSOCK
+#    define DT_CHR      S_IFCHR
+#    define DT_BLK      S_IFBLK
+#    define DT_LNK      S_IFLNK
 
 /* Macros for converting between st_mode and d_type */
-#define IFTODT(mode) ((mode) & S_IFMT)
-#define DTTOIF(type) (type)
+#    define IFTODT(mode) ((mode) & S_IFMT)
+#    define DTTOIF(type) (type)
 
 
 /* Return the exact length of d_namlen without zero terminator */
-#define _D_EXACT_NAMLEN(p) ((p)->d_namlen)
+#    define _D_EXACT_NAMLEN(p) ((p)->d_namlen)
 
 /* Return number of bytes needed to store d_namlen */
-#define _D_ALLOC_NAMLEN(p) (PATH_MAX)
+#    define _D_ALLOC_NAMLEN(p) (PATH_MAX)
 
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 
 
 /* Wide-character version */
@@ -183,11 +191,11 @@ extern "C" {
 
 
 /* For compatibility with Symbian */
-#define wdirent _wdirent
-#define WDIR _WDIR
-#define wopendir _wopendir
-#define wreaddir _wreaddir
-#define wclosedir _wclosedir
+#    define wdirent _wdirent
+#    define WDIR _WDIR
+#    define wopendir _wopendir
+#    define wreaddir _wreaddir
+#    define wclosedir _wclosedir
 //#define wrewinddir _wrewinddir
 
 
@@ -523,8 +531,7 @@ extern "C" {
 				error =
 				    dirent_wcstombs_s(&n, dirp->ent.d_name,
 						      PATH_MAX,
-						      datap->
-						      cAlternateFileName,
+						      datap->cAlternateFileName,
 						      PATH_MAX);
 			}
 
@@ -622,14 +629,14 @@ extern "C" {
 			   const char *mbstr, size_t count) {
 		int error;
 
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
+#    if defined(_MSC_VER)  &&  _MSC_VER >= 1400
 
 		/* Microsoft Visual Studio 2005 or later */
 		error =
 		    mbstowcs_s(pReturnValue, wcstr, sizeInWords, mbstr,
 			       count);
 
-#else
+#    else
 
 		/* Older Visual Studio or non-Microsoft compiler */
 		size_t n;
@@ -661,7 +668,7 @@ extern "C" {
 
 		}
 
-#endif
+#    endif
 
 		return error;
 	}
@@ -672,14 +679,14 @@ extern "C" {
 			   const wchar_t * wcstr, size_t count) {
 		int error;
 
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
+#    if defined(_MSC_VER)  &&  _MSC_VER >= 1400
 
 		/* Microsoft Visual Studio 2005 or later */
 		error =
 		    wcstombs_s(pReturnValue, mbstr, sizeInBytes, wcstr,
 			       count);
 
-#else
+#    else
 
 		/* Older Visual Studio or non-Microsoft compiler */
 		size_t n;
@@ -711,7 +718,7 @@ extern "C" {
 
 		}
 
-#endif
+#    endif
 
 		return error;
 	}
@@ -719,21 +726,21 @@ extern "C" {
 /* Set errno variable */
 	static void
 	 dirent_set_errno(int error) {
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
+#    if defined(_MSC_VER)  &&  _MSC_VER >= 1400
 
 		/* Microsoft Visual Studio 2005 and later */
 		_set_errno(error);
 
-#else
+#    else
 
 		/* Non-Microsoft compiler or older Microsoft compiler */
 		errno = error;
 
-#endif
+#    endif
 	}
 
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 }
-#endif
+#    endif
 #endif				/*DIRENT_H */

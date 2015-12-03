@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
-#include <winsock2.h>
+#    include <winsock2.h>
 #else
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
+#    include <unistd.h>
+#    include <sys/socket.h>
+#    include <netdb.h>
+#    include <netinet/in.h>
 #endif
 #define SERVER_REPLY_LENGTH 200000
 #define HTTP_PORT_NUMBER 80
@@ -81,14 +81,11 @@ bool sendHTTPRequest(char **server_reply, const char *hostname,
 			WSAGetLastError());
 		return 0;
 	}
-
 	//Create a socket
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 		fprintf(stderr, "Could not create socket : %d\n",
 			WSAGetLastError());
 	}
-
-
 	//Prepare server struct
 	server.sin_addr.s_addr = inet_addr(hostname);	//Should be IP address
 	server.sin_family = AF_INET;
@@ -99,7 +96,6 @@ bool sendHTTPRequest(char **server_reply, const char *hostname,
 		fprintf(stderr, "connect error\n");
 		return 0;
 	}
-
 	//Send message
 	if (send(s, message, strlen(message), 0) < 0) {
 		fprintf(stderr, "Send failed\n");
@@ -112,7 +108,6 @@ bool sendHTTPRequest(char **server_reply, const char *hostname,
 		fprintf(stderr, "recv failed\n");
 		return 0;
 	}
-
 	//Add a NULL terminating character
 	(*server_reply)[recv_size] = '\0';
 #endif

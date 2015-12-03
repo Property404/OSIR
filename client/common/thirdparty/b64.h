@@ -3,7 +3,7 @@
   Modified for OSIR by Dagan Martinez
 */
 #ifndef HEADER_B64
-#define HEADER_B64
+#    define HEADER_B64
 	//base64 decoding - returns size of output
 unsigned int b64decode(char **output, const char *intext);
 

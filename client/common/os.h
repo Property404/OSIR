@@ -4,11 +4,11 @@
 	with the operating system
 */
 #ifndef HEADER_OS
-#define HEADER_OS 1
-#include <stdbool.h>
-#include <stdint.h>
+#    define HEADER_OS 1
+#    include <stdbool.h>
+#    include <stdint.h>
 
-	//Structure of executable program
+//Structure of executable program
 typedef struct Executable {
 	//overall;
 	bool is_exec;
@@ -21,20 +21,20 @@ typedef struct Executable {
 
 } Executable;
 
-	//Walk through directory
+//Walk through directory
 char **walkDir(const char *);
 
-	//Set/get File Time
+//Set/get File Time
 bool setFileModifiedDate(const char *, time_t);
 time_t getFileModifiedDate(const char *filename);
 
-	//Check file extension
+//Check file extension
 char *getFileExtension(const char *filename);
 
-	//Get executable type
+//Get executable type
 struct Executable *getExecType(const char *filename);
 
-	//Get file size in bytes (-1 means error)
+//Get file size in bytes (-1 means error)
 int64_t getFileSize(const char *filename);
 
 #endif

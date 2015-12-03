@@ -16,7 +16,7 @@
 	$encrypted_key=$rsakey->encrypt($symkey);
 	
 	//Make assertion
-	assert($symkey!==$rsakey->decrypt($encrypted_key));
+	assert($symkey==$rsakey->decrypt($encrypted_key));
 	
 	echo(WeakCrypt::encrypt($encrypted_key));
 ?>

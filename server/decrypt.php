@@ -1,16 +1,15 @@
-<!DOCTYPE>
+<!DOCTYPE HTML>
+<html>
 <head>
 	<title></title>
 	<link rel="stylesheet" href="./style/main.css">
-	
 </head>
 <body>
 	<div class="midcenter">
 	<?php
-		die(0&&6);
 		//Load modules
-		include("mods/keypair.php");
-		include("mods/session.php");
+		include_once("mods/keypair.php");
+		include_once("mods/session.php");
 		
 		//Start session
 		session_start();
@@ -40,11 +39,14 @@
 				
 				//An error occured
 				echo("<h1>Oh no!</h1>\nSomething went wrong! We weren't able to decrypt your key.");
+				unset($_SESSION);
+				session_destroy();
 			}
 		}else{
 			
 			//Notify user isn't authenticated
 			echo("<h1 style='color:red'>Not Authenticated</h1>");
+			session_destroy();
 		}
 	?>
 		

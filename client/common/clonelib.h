@@ -3,9 +3,9 @@
 	cloning functions.
 */
 #ifndef HEADER_CLONELIB
-#define HEADER_CLONELIB
-#include <stdbool.h>
-#include <stdint.h>
+#    define HEADER_CLONELIB
+#    include <stdbool.h>
+#    include <stdint.h>
 
 	//Gets own binary
 int64_t getOwnBytes(char **, const char *);
