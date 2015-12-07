@@ -8,8 +8,9 @@
 	error_reporting(E_ALL);
 	
 	//Import necessary modules
-	include("../mods/session.php");
-	include("../mods/security.php");
+	include_once("../mods/session.php");
+	include_once("../mods/security.php");
+	include_once("../mods/eventlog.php");
 	
 	//Connect to database
 	$link=Session::forceConnectDB();
@@ -43,6 +44,11 @@
 		//Increment attempts
 		$attempts++;
 		mysqli_query($link,"UPDATE admin SET ATTEMPTS=$attempts WHERE ID=1");
+		
+		if($attempts>10){
+			EventLog::addEntry($link, EventLog::SECURITY_EVENT, "Failed login with $attempts attempts");
+			die(":(");
+		}
 		
 		//Incorrect hash, go back to login page
 		header("Location: login.php?f");

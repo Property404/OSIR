@@ -10,9 +10,10 @@ Most OCP functionalities are implemented here-->
 	<body>
 		<?php
 			error_reporting(E_ALL);
-			include("menu.php");
-			include("../mods/keypair.php");
-			include("../mods/security.php");
+			include_once("menu.php");
+			include_once("../mods/keypair.php");
+			include_once("../mods/security.php");
+			include_once("../mods/eventlog.php");
 		?>
 		
 		<div class="midcenter">
@@ -59,13 +60,36 @@ Most OCP functionalities are implemented here-->
 				
 				//Print help info
 				if($_GET["op"]=="help"){
-					echo("<div class='topcenter'>");
-					include("../mods/docpage.php");
-					include("../doc/pages.php");
-					$current_page=$home;
-					$doc=new Documentation($home,$_GET["page"],"?op=help&page=");
-					$doc->listPages($show=false);
-					$doc->displayPage();
+					header("location: ../doc/index.php?page=0");
+				}
+				
+				else if($_GET["op"]=="clearlog"){
+					$link=Session::forceConnectDB();
+					EventLog::clear($link);
+					header("location: ./?op=log");
+				}
+				//Show event log
+				else if($_GET["op"]=="log"){
+					$link=Session::forceConnectDB();
+					
+					//Options
+					echo("<table border='0'><tr><td style='text-align:left'><a href='./?op=log'>Refresh</a></td><td style='text-align:right;'><a href='./?op=clearlog'>Clear</a></td></tr></table>");
+					
+					//Print out table header
+					echo("<table border='1' style='text-align: center'>");
+					echo("<tr><td><strong>ID</strong></td><td><strong>Timestamp</strong></td><td><strong>IP</strong></td><td><strong>Type</strong></td><td><strong>Details</strong></td>"
+					);
+					
+					//Loop through event entries
+					for($i=1;;$i++){
+						$k=EventLog::getEntry($link, $i);
+						if($k==null)break;
+						echo("<tr>");
+						for($j=0; $j<5; $j++)
+							echo("<td>".$k[$j]."</td>");
+						echo("</tr>");
+					}
+					echo("</table>");
 				}
 				
 				//Make manage keys form
@@ -109,7 +133,8 @@ Most OCP functionalities are implemented here-->
 					
 					//Show public key
 					if(array_key_exists("show_key",$_POST)){
-						for($i=1;$i<KeyPair::getHighestID($link);$i++)
+						echo($_POST["opt"]);
+						for($i=1;$i<=KeyPair::getHighestID($link);$i++)
 							if((new KeyPair())->sqlImport($link,$i)->toString()==$_POST["opt"])
 								header("Location: ?op=mankey&show=".$i);
 						

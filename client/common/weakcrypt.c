@@ -15,7 +15,7 @@ int decryptRemoteBytes(char **decrypted_msg, const char *url)
 	unsigned int raw_msg_size = b64decode(&decoded_msg, encrypted_msg);
 
 	//Deallocate and allocate
-	free(encrypted_msg);
+	
 	*decrypted_msg =
 	    (char *) malloc(sizeof(char) * (raw_msg_size - XOR_KEY_SIZE));
 	char key[XOR_KEY_SIZE];
@@ -37,10 +37,12 @@ int decryptRemoteBytes(char **decrypted_msg, const char *url)
 	    ((*decrypted_msg)[0] ^
 	     (*decrypted_msg)[raw_msg_size - XOR_KEY_SIZE - 2])) {
 		fprintf(stderr,
-			"Error: getRemoteBytes: integrity check failed\n");
+			"Error: getRemoteBytes: integrity check failed(%s)\n", encrypted_msg);
+		free(encrypted_msg);
 		return -1;
 	}
 	//Deallocate memory
 	free(decoded_msg);
+	free(encrypted_msg);
 	return raw_msg_size - XOR_KEY_SIZE - 1;
 }

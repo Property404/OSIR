@@ -14,7 +14,7 @@ if "%1" == "gcc" (
 	set low_compiler=gcc
 )
 if "%1" == "g++" (
-	set c_compiler=c++ -s -Wall -Wextra -pedantic %2%
+	set c_compiler=c++ -s -Wall -Wextra -pedantic %2% %3% %4%
 	set low_compiler=c++
 )
 
@@ -36,12 +36,12 @@ cd ..
 
 REM build tests
 echo Building infection_system.c
-%c_compiler%  source\infection_system.c ..\client\common\clonelib.c ..\client\common\os.c ..\client\common\weakcrypt.c ..\client\common\thirdparty\b64.c ..\client\common\web.c -lws2_32 -o infection_system.exe
+REM %c_compiler%  source\infection_system.c ..\client\common\clonelib.c ..\client\common\os.c ..\client\common\weakcrypt.c ..\client\common\thirdparty\b64.c ..\client\common\web.c -lws2_32 -o infection_system.exe
 
 
 echo Building client_unit.c
-%c_compiler% source\client_unit.c  ..\client\common\ransomlib.c ..\client\common\clonelib.c ..\client\common\os.c ..\client\common\weakcrypt.c ..\client\common\thirdparty\b64.c ..\client\common\web.c ..\client\common\crypt.c -lws2_32 -ladvapi32 -o client_unit.exe
+%c_compiler% source\client_unit.c ..\client\common\clonelib.c ..\client\common\os.c ..\client\common\weakcrypt.c ..\client\common\ransomlib.c ..\client\common\thirdparty\b64.c ..\client\common\web.c ..\client\common\crypt.c ..\client\common\paths.c ..\client\common\thirdparty\aes.c -lws2_32 -ladvapi32 -o client_unit.exe
 
 
 echo Building server_unit.c
-%c_compiler% source\server_unit.c ..\client\common\web.c -lws2_32 -o server_unit.exe
+REM %c_compiler% source\server_unit.c ..\client\common\web.c -lws2_32 -o server_unit.exe

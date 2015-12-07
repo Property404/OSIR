@@ -9,12 +9,9 @@
 
 	//Replication Settings
 #    define CROSS_PLATFORM_ON 1
-
-	//Server IP address
-	//#define SERVER_HOSTNAME "127.0.0.1"
-
+ 
 	//OSIR root directory
-#    define SERVER_OSIR_HOME "127.0.0.1/osir"
+#    define SERVER_OSIR_HOME "http://127.0.0.1/osir"
 
 	//These should be the same size
 #    define XBIN_WIN64 "/xbinaries/x_win64"

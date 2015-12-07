@@ -1,3 +1,4 @@
+
 /*
 	OSIR's semi-generic encryption
 	interface
@@ -8,9 +9,9 @@
 #    include <stdint.h>
 
 	//Symmetric encryption and decryption
-bool symEncrypt(char **ciphertext, const char *keyiv,
-		const char *plaintext, const int64_t);
-bool symDecrypt(char **plaintext, const char *keyiv,
+bool symEncrypt(char *ciphertext, const char *keyiv,
+		char *plaintext, const int64_t);
+bool symDecrypt(char *plaintext, const char *keyiv,
 		const char *ciphertext, const int64_t);
 
 	//Secure random number generation

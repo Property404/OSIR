@@ -8,9 +8,9 @@
 		<ul>
 			<li class="headerlink">OSIR &nbsp; &nbsp;
 			<ul>
+			<li><a href="?op=log">Event Log</a></li>
 			<li><a href="?op=manbin">Manage Binaries</a></li>
 			<li><a href="?op=mankey">Manage Keys</a></li>
-			<li><a href="?op=wallet">Manage Wallet</a></li>
 			</ul>
 			</li>
 		</ul>

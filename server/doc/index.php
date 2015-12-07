@@ -17,8 +17,8 @@
 		<?php
 			//Strict error checking
 			error_reporting(E_ALL);
-
 			include("../mods/docpage.php");
+			
 			//Get page objects(within $home) from pages.php
 			include("pages.php");
 			$current_page=$home;

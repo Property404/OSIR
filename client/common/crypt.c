@@ -1,5 +1,6 @@
 #include "crypt.h"
 #include "common.h"
+#include "thirdparty/aes.h"
 #include <stdio.h>
 #ifdef _WIN32
 #    include "windows.h"
@@ -31,50 +32,55 @@ bool secureRand(char **output, const int size)
 #else
 	//FIXME: read from /dev/urandom
 	for (int i = 0; i < size; i++) {
-		*output[i] = rand() % 256 - 128;
+		(*output)[i] = rand() % 256 - 128;
 	}
 #endif
 	return 1;
 }
 
-/*
-Current Prototype's encryption scheme: XOR
-This is a placeholder for real encryption
-The next prototype should implement TwoFish,
-Blowfish, Serpent, or else (ideally) AES
-PTO means "ProtoType Only"
-*/
-
 //Symmetric encryption
-bool symEncrypt(char **ciphertext, const char *keyiv,
-		const char *plaintext, const int64_t ptsize)
-{
-	//PTO: encrypt with XOR
-	for (unsigned int i = 0; i < ptsize; i++)
-		(*ciphertext)[i] =
-		    keyiv[i % SYMMETRIC_KEY_SIZE] ^ plaintext[i];
+bool symEncrypt(char *ciphertext, const char *keyiv,
+		char *plaintext, const int64_t ptsize){
+	//Split Key and IV
+	uint8_t key[SYMMETRIC_KEY_SIZE];
+	uint8_t iv[SYMMETRIC_IV_SIZE];
+	for(int i=0; i < SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE;i++){
+		if(i<SYMMETRIC_KEY_SIZE)
+			key[i]=keyiv[i];
+		else
+			iv[i-SYMMETRIC_KEY_SIZE]=keyiv[i];
+	}
 
-
-	//Return size;
-	return true;
+	//Hack for TCC compilation
+	//Unit test segfaults if we bypass this step
+	uint8_t pt[MAX_BYTES_TO_ENCRYPT];
+	for(int64_t i=0; i<ptsize; i++)
+		pt[i]=(uint8_t)plaintext[i];
+	
+	//Encrypt
+	AES128_CBC_encrypt_buffer((uint8_t *)ciphertext, pt, (uint32_t)ptsize, key, iv);
+		
+	return 1;
 }
 
 
 //Symmetric Decryption
-bool symDecrypt(char **plaintext, const char *keyiv,
+bool symDecrypt(char *plaintext, const char *keyiv,
 		const char *ciphertext, const int64_t ctsize)
 {
-
-	//Extract IV
-	char *iv = (char *) malloc(sizeof(char) * SYMMETRIC_IV_SIZE);
-	for (int i = 0; i < SYMMETRIC_IV_SIZE; i++)
-		iv[i] = keyiv[SYMMETRIC_KEY_SIZE + i];
-
-	//PTO: Decrypt message
-	for (int64_t i = 0; i < ctsize; i++)
-		(*plaintext)[i] =
-		    ciphertext[i] ^ keyiv[i % SYMMETRIC_KEY_SIZE];
-
-	return true;
+	//Get Key and IV
+	uint8_t key[SYMMETRIC_KEY_SIZE];
+	uint8_t iv[SYMMETRIC_IV_SIZE];
+	for(int i=0; i < SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE;i++){
+		if(i<SYMMETRIC_KEY_SIZE)
+			key[i]=keyiv[i];
+		else
+			iv[i-SYMMETRIC_KEY_SIZE]=keyiv[i];
+	}
+	
+	//Encrypt
+	AES128_CBC_decrypt_buffer((uint8_t *)plaintext, (uint8_t *)ciphertext, ctsize, key, iv);
+		
+	return 1;
 
 }

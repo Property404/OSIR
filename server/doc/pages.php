@@ -22,11 +22,11 @@
 		<b>Language(client):</b>
 		C<br><br>
 		<b>Language(backend):</b>
-		PHP(>=5.4), Python(>=3.4)<br><br>
-		<b>Paradigm:</b> Procedural, with some server-side OOP<br><br>
+		PHP(>=5.6), Python(>=3.4)<br><br>
+		<b>Paradigm:</b> Procedural client-side coding, with server-side OOP<br><br>
 		<b>Compiler:</b>
 		<a href='http://bellard.org/tcc/'>Tiny C Compiler</a>, <a href='https://gcc.gnu.org/'>GCC</a><br><br>
-		<b>Dependencies:</b> libusb, libtomcrypt<br><br>
+		<b>Dependencies:</b> tiny aes, winapi<br><br>
 		<b>License:</b> <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GPLv3</a>
 		</div>",[new Docpage("Dev Requirements","<div style='text-align: left;'>
 	<ul style='text-align: left'>
@@ -84,7 +84,7 @@
 		</li>
 	</ul>
 </div>")]),
-		new Docpage("Building","Building OSIR involves uploading the backend and compiling the client bla bla",[
+		new Docpage("Building","Building OSIR involves uploading the backend and compiling the client.",[
 			new Docpage("Requirements","<div style='text-align: left'><b>Client</b><ul>
 			<li><a href='https://github.com/Property404/OSIR'>OSIR source code</a></li>
 			<li>TCC(Tiny C Compiler) <strong>or</strong> GCC(GNU Compiler Collection)</li>
@@ -95,7 +95,8 @@
 			<li>OSIR source code</li>
 			<li>Apache</li>
 			<li>MySQL</li>
-			<li>PHP (>=5.4)</li>
+			<li>PHP (>=5.6)</li>
+			<li>Python (>=3.4)</li>
 			</ul>
 			</div>"),
 			new DocPage("Deploying Backend","Deploying the backend requires an *<a href='https://en.wikipedia.org/wiki/Solution_stack'>AMP</a> server. For testing purposes, you can use <a href='https://en.wikipedia.org/wiki/Xampp'>XAMPP</a> on <a href='https://en.wikipedia.org/wiki/Localhost'>localhost</a>.<br><br><div style='text-align: left;'

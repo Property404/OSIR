@@ -6,8 +6,7 @@
 /*====== GLOBAL OVERRIDES FOR MAJOR ITEMS AND DIFFERING BROWSER DEFAULTS =====*/
 
 
-body, table, img, button, iframe, ul, li  { margin:0; padding:0; border:0; }
-table { text-align:left; }
+body, img, button, iframe, ul, li  { margin:0; padding:0; border:0; }
 iframe { width:0; height:0 }
 
 ul { margin-left:20px; }       /* kill default 50px left padding and set 20px */

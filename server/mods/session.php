@@ -30,6 +30,14 @@
 										SIZE int(11),
 										PRIMARY KEY (ID)
 										)";
+		const _LOG_TABLE_DEFINITION="CREATE TABLE LOG(
+										ID int(11) AUTO_INCREMENT,
+										TIMESTAMP varchar(32) NOT NULL,
+										IP varchar(32) NOT NULL,
+										TYPE varchar(32) NOT NULL,
+										ENTRY varchar(1024) NOT NULL,
+										PRIMARY KEY (ID)
+										)";
 										
 		//Private methods
 		private static function setInitialAdminTable($link){
@@ -74,6 +82,11 @@
 			if(empty(mysqli_query($link, "SELECT ID FROM RSAKEYS"))){
 				mysqli_query($link,self::_KEYS_TABLE_DEFINITION);
 				self::setInitialKeysTable($link);
+			}
+			if(empty(mysqli_query($link, "SELECT ID FROM LOG"))){
+				mysqli_query($link,self::_LOG_TABLE_DEFINITION);
+				include_once("eventlog.php");
+				EventLog::addEntry($link, "Server", "Created table LOG", true);
 			}
 			return $link;
 		}
