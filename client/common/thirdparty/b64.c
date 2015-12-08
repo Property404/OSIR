@@ -153,9 +153,9 @@ char *b16decode(const char *intext)
 		output[i] =
 		    //Decode first hex char into first four bits
 		    (intext[2 * i] -
-		     (intext[2 * i] > HEX_A ? HEX_A - 10 : '0')) * 16
+		     (intext[2 * i] >= HEX_A ? HEX_A - 10 : '0')) * 16
 		    //Decode last hex char into last four bits
-		    + intext[2 * i + 1] - (intext[2 * i + 1] >
+		    + intext[2 * i + 1] - (intext[2 * i + 1] >=
 					   HEX_A ? HEX_A - 10 : '0');
 
 	//Add ending byte and return

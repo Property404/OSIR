@@ -40,47 +40,61 @@ bool secureRand(char **output, const int size)
 
 //Symmetric encryption
 bool symEncrypt(char *ciphertext, const char *keyiv,
-		char *plaintext, const int64_t ptsize){
+		char *plaintext, const int64_t ptsize)
+{
+	//Check size
+	if(ptsize < 16){
+		printf("Warning: symEncrypt: ptsize<16 bytes");
+	}
+	
+	//Zero out memory
+	memset(ciphertext, 0, ptsize);
+	
 	//Split Key and IV
 	uint8_t key[SYMMETRIC_KEY_SIZE];
 	uint8_t iv[SYMMETRIC_IV_SIZE];
-	for(int i=0; i < SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE;i++){
-		if(i<SYMMETRIC_KEY_SIZE)
-			key[i]=keyiv[i];
+	for (int i = 0; i < SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE; i++) {
+		if (i < SYMMETRIC_KEY_SIZE)
+			key[i] = keyiv[i];
 		else
-			iv[i-SYMMETRIC_KEY_SIZE]=keyiv[i];
+			iv[i - SYMMETRIC_KEY_SIZE] = keyiv[i];
 	}
 
+	
 	//Hack for TCC compilation
 	//Unit test segfaults if we bypass this step
 	uint8_t pt[MAX_BYTES_TO_ENCRYPT];
-	for(int64_t i=0; i<ptsize; i++)
-		pt[i]=(uint8_t)plaintext[i];
-	
+	for (int64_t i = 0; i < ptsize; i++)
+		pt[i] = (uint8_t) plaintext[i];
+
 	//Encrypt
-	AES128_CBC_encrypt_buffer((uint8_t *)ciphertext, pt, (uint32_t)ptsize, key, iv);
-		
+	AES128_CBC_encrypt_buffer((uint8_t *) ciphertext, pt,
+				  (uint32_t) ptsize, key, iv);
 	return 1;
 }
 
 
 //Symmetric Decryption
 bool symDecrypt(char *plaintext, const char *keyiv,
-		const char *ciphertext, const int64_t ctsize)
+		char *ciphertext, const int64_t ctsize)
 {
+	if(ctsize < 16){
+		printf("Warning: symDecrypt: ctsize<16 bytes");
+	}
+
 	//Get Key and IV
 	uint8_t key[SYMMETRIC_KEY_SIZE];
 	uint8_t iv[SYMMETRIC_IV_SIZE];
-	for(int i=0; i < SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE;i++){
-		if(i<SYMMETRIC_KEY_SIZE)
-			key[i]=keyiv[i];
+	for (int i = 0; i < SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE; i++) {
+		if (i < SYMMETRIC_KEY_SIZE)
+			key[i] = keyiv[i];
 		else
-			iv[i-SYMMETRIC_KEY_SIZE]=keyiv[i];
+			iv[i - SYMMETRIC_KEY_SIZE] = keyiv[i];
 	}
 	
 	//Encrypt
-	AES128_CBC_decrypt_buffer((uint8_t *)plaintext, (uint8_t *)ciphertext, ctsize, key, iv);
-		
+	AES128_CBC_decrypt_buffer((uint8_t *) plaintext,
+				  (uint8_t *) ciphertext, ctsize, key, iv);
 	return 1;
 
 }

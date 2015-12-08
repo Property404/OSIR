@@ -531,8 +531,7 @@ extern "C" {
 				error =
 				    dirent_wcstombs_s(&n, dirp->ent.d_name,
 						      PATH_MAX,
-						      datap->
-						      cAlternateFileName,
+						      datap->cAlternateFileName,
 						      PATH_MAX);
 			}
 
