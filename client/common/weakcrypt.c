@@ -49,10 +49,11 @@ int decryptRemoteBytes(char **decrypted_msg, const char *url)
 	return raw_msg_size - XOR_KEY_SIZE - 1;
 }
 
-void hash16(char *hash, const char* input, const int length){
+void hash16(char *hash, const char *input, const int length)
+{
 	const int hash_length = 2;
-	memset(hash,0,hash_length);
-	for(int i=0; i<length; i++){
-		hash[i%hash_length] ^= input[i];
+	memset(hash, 0, hash_length);
+	for (int i = 0; i < length; i++) {
+		hash[i % hash_length] ^= input[i];
 	}
 }

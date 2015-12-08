@@ -25,20 +25,19 @@ bool getHomePath(char *path)
 
 }
 
-char ** getExternalPaths()
+char **getExternalPaths()
 {
 	FILE *fp;
 	const int line_size = 256;
 	const char *home_dir = getenv("USERPROFILE");
 	char current_drive[line_size];
-	
+
 	//Error check
 	if (home_dir == NULL) {
 		fprintf(stderr,
 			"Error: getExternalPaths: getenv failed\n");
 		return 0;
 	}
-	
 	//Get current drive
 	memset(current_drive, '\0', line_size);
 	for (int i = 0; i < line_size; i++)
@@ -46,7 +45,6 @@ char ** getExternalPaths()
 			memcpy(current_drive, &home_dir[0], i + 1);
 			break;
 		}
-
 	//Open command as file
 	fp = popen("wmic logicaldisk get caption", "r");
 
@@ -57,7 +55,7 @@ char ** getExternalPaths()
 		return 0;
 	}
 	//Allocate memory for path list
-	char** paths = (char **) malloc(1);
+	char **paths = (char **) malloc(1);
 	paths[0] = (char *) malloc(line_size);
 
 	//Read lines from pfile
@@ -70,6 +68,7 @@ char ** getExternalPaths()
 				break;
 			}
 		}
+		//Skip if current drive
 		if (!strcmp(paths[i], current_drive))
 			i--;
 		else {

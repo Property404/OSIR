@@ -326,6 +326,8 @@ Most OCP functionalities are implemented here-->
 					header("Location: ?op=manfile");
 				}
 				
+			}else{
+				header("location: ?op=log");
 			}
 		?>
 		</div>
